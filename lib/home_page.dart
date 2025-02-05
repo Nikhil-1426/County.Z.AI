@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   @override
@@ -29,9 +31,36 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _sendImageToBackend() {
-    // TODO: Implement sending image to Flask
-    print("Sending image to backend: ${_image?.path}");
+  Future<void> _sendImageToBackend() async {
+    if (_image == null) return;
+
+    // Create a request
+    var request = http.MultipartRequest('POST', Uri.parse('https://pipe-counting-app.onrender.com/upload'));
+    
+    // Attach image file
+    request.files.add(await http.MultipartFile.fromPath('file', _image!.path));
+
+    // Send the request
+    try {
+      var response = await request.send();
+
+      // Check if the request was successful
+      if (response.statusCode == 200) {
+        // Read the response from the server
+        var responseData = await response.stream.bytesToString();
+        var jsonResponse = jsonDecode(responseData);
+        
+        // Assume the server returns a JSON object with a 'pipe_count' key
+        setState(() {
+          _pipeCount = jsonResponse['pipe_count']; // Adjust based on actual response
+        });
+      } else {
+        // Handle error
+        print('Failed to send image: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override

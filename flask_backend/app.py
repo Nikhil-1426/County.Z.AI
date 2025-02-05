@@ -13,7 +13,7 @@ def process_image(image_file):
     
     # Process the image (for demonstration purposes, let's draw some text on it)
     draw = ImageDraw.Draw(image)
-    text = f"Processed Image - {random.randint(1, 100)}"
+    text = f"Pipes Detected: {random.randint(1, 100)}"  # Simulate pipe count
     font = ImageFont.load_default()
     draw.text((10, 10), text, fill="white", font=font)
 
@@ -39,12 +39,15 @@ def upload_image():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
-    # Process the image using the process_image function
-    img_byte_arr, text = process_image(file)
+    try:
+        # Process the image using the process_image function
+        img_byte_arr, text = process_image(file)
 
-    # Return the processed image and text
-    return jsonify({"message": text}), send_file(img_byte_arr, mimetype='image/png')
+        # Return the processed image and pipe count as JSON
+        return jsonify({"pipe_count": text}), send_file(img_byte_arr, mimetype='image/png')
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
-
