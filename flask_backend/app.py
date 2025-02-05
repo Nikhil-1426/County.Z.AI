@@ -24,6 +24,10 @@ def process_image(image_file):
 
     return img_byte_arr, text
 
+@app.route('/')
+def home():
+    return "Hello, world!"
+
 @app.route('/upload', methods=['POST'])
 def upload_image():
     # Check if the image is provided
