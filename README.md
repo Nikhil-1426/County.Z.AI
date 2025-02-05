@@ -1,4 +1,4 @@
-# pipe_counting_app
+# Pipe Counter App
 
 A new Flutter project.
 
