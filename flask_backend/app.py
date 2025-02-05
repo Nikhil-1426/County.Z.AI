@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from PIL import Image, ImageDraw, ImageFont
 import io
+import os
 import random
 
 app = Flask(__name__)
@@ -41,4 +42,5 @@ def upload_image():
     return jsonify({"message": text}), send_file(img_byte_arr, mimetype='image/png')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+
