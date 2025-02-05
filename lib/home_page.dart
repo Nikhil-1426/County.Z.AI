@@ -45,111 +45,109 @@ class _HomePageState extends State<HomePage> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return Center(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: constraints.maxHeight * 0.05), // Top spacing
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 30), // Space from the top bar
 
-                    // Dynamic Image Display
-                    Container(
-                      width: double.infinity,
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.4, // Adapts dynamically
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: _image != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.file(
-                                File(_image!.path),
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                              ),
-                            )
-                          : Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 100,
-                                color: const Color.fromARGB(255, 97, 91, 91),
-                              ),
+                  // Dynamic Image Display
+                  Container(
+                    width: double.infinity,
+                    constraints: BoxConstraints(
+                      maxHeight: constraints.maxHeight * 0.4, // Adapts dynamically
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: _image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.file(
+                              File(_image!.path),
+                              width: double.infinity,
+                              fit: BoxFit.contain,
                             ),
-                    ),
-                    SizedBox(height: 15),
-
-                    // Send & Remove Buttons (Properly Centered & Same Size)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildFixedSizeButton(
-                          icon: Icons.send,
-                          text: "Send",
-                          onTap: _image != null ? _sendImageToBackend : null,
-                          color: Colors.green,
-                        ),
-                        SizedBox(width: 20),
-                        _buildFixedSizeButton(
-                          icon: Icons.delete,
-                          text: "Remove",
-                          onTap: _image != null ? _removeImage : null,
-                          color: Colors.red,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25),
-
-                    // Gallery & Camera Options (Properly Centered)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildLargeButton(
-                          icon: Icons.image,
-                          text: "Gallery",
-                          onTap: () => _pickImage(ImageSource.gallery),
-                        ),
-                        SizedBox(width: 20),
-                        _buildLargeButton(
-                          icon: Icons.camera_alt,
-                          text: "Camera",
-                          onTap: () => _pickImage(ImageSource.camera),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25),
-
-                    // Pipe Count Display Box (Centered)
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(vertical: 15),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
+                          )
+                        : Center(
+                            child: Icon(
+                              Icons.image,
+                              size: 100,
+                              color: Colors.grey[700],
+                            ),
                           ),
-                        ],
+                  ),
+                  SizedBox(height: 15),
+
+                  // Send & Remove Buttons (Properly Centered & Same Size)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildFixedSizeButton(
+                        icon: Icons.send,
+                        text: "Send",
+                        onTap: _image != null ? _sendImageToBackend : null,
+                        color: Colors.green,
                       ),
-                      child: Center(
-                        child: Text(
-                          _pipeCount != null ? "Pipes Detected: $_pipeCount" : "No pipe count available",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 97, 91, 91)),
+                      SizedBox(width: 20),
+                      _buildFixedSizeButton(
+                        icon: Icons.delete,
+                        text: "Remove",
+                        onTap: _image != null ? _removeImage : null,
+                        color: Colors.red,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+
+                  // Gallery & Camera Options (Properly Centered)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildLargeButton(
+                        icon: Icons.image,
+                        text: "Gallery",
+                        onTap: () => _pickImage(ImageSource.gallery),
+                      ),
+                      SizedBox(width: 20),
+                      _buildLargeButton(
+                        icon: Icons.camera_alt,
+                        text: "Camera",
+                        onTap: () => _pickImage(ImageSource.camera),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+
+                  // Pipe Count Display Box (Centered)
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
                         ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        _pipeCount != null ? "Pipes Detected: $_pipeCount" : "No pipe count available",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 97, 91, 91)),
                       ),
                     ),
+                  ),
 
-                    SizedBox(height: constraints.maxHeight * 0.05), // Bottom spacing
-                  ],
-                ),
+                  SizedBox(height: 20), // Space at the bottom
+                ],
               ),
             ),
           );
