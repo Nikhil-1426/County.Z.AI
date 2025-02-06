@@ -11,7 +11,7 @@ app = Flask(__name__)
 def process_image(image_file):
     try:
         # Fetch a default success image from the web
-        image_url = "https://www.google.com/imgres?q=success%20image%20tick%20image&imgurl=https%3A%2F%2Fcdn2.iconfinder.com%2Fdata%2Ficons%2Fgreenline%2F512%2Fcheck-512.png&imgrefurl=https%3A%2F%2Fwww.iconfinder.com%2Ficons%2F1930264%2Fcheck_complete_done_green_success_valid_icon&docid=qiUH_zztRe7V2M&tbnid=teuprMWjCcjRLM&vet=12ahUKEwiO6-3psK6LAxXEVWwGHVdvJPUQM3oECBUQAA..i&w=512&h=512&hcb=2&ved=2ahUKEwiO6-3psK6LAxXEVWwGHVdvJPUQM3oECBUQAA"
+        image_url = "https://raw.githubusercontent.com/Nikhil-1426/Justice.ai/main/src/assets/final_logo.png"
         response = requests.get(image_url)
         
         if response.status_code != 200:
