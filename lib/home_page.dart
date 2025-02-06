@@ -1,4 +1,5 @@
 // import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,7 +35,9 @@ class _HomePageState extends State<HomePage> {
   Future<void> _sendImageToBackend() async {
   if (_image == null) return;
 
-  var request = http.MultipartRequest('POST', Uri.parse('https://pipe-counting-app.onrender.com/upload'));
+  var request = http.MultipartRequest(
+      'POST', Uri.parse('https://pipe-counting-app.onrender.com/upload'));
+  
   request.files.add(await http.MultipartFile.fromPath('file', _image!.path));
 
   try {
@@ -42,8 +45,15 @@ class _HomePageState extends State<HomePage> {
 
     if (response.statusCode == 200) {
       var bytes = await response.stream.toBytes();
+
+      // Save received image to temporary file
+      final tempDir = await getTemporaryDirectory();
+      final filePath = '${tempDir.path}/processed_image.png';
+      File file = File(filePath);
+      await file.writeAsBytes(bytes);
+
       setState(() {
-        _image = XFile.fromData(bytes); // Update with processed image
+        _image = XFile(filePath);  // Use the temporary file path
       });
     } else {
       print('Failed to process image: ${response.statusCode}');
@@ -52,7 +62,6 @@ class _HomePageState extends State<HomePage> {
     print('Error: $e');
   }
 }
-
 
   @override
   Widget build(BuildContext context) {

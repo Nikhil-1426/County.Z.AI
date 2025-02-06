@@ -3,26 +3,29 @@ from PIL import Image, ImageDraw, ImageFont
 import io
 import os
 import random
+import requests
 
 app = Flask(__name__)
 
 # Function to process image (draws text on image for now)
 def process_image(image_file):
-    # Open the image
-    image = Image.open(image_file)
+    try:
+        # Fetch a default success image from the web
+        image_url = "https://www.google.com/imgres?q=success%20image%20tick%20image&imgurl=https%3A%2F%2Fcdn2.iconfinder.com%2Fdata%2Ficons%2Fgreenline%2F512%2Fcheck-512.png&imgrefurl=https%3A%2F%2Fwww.iconfinder.com%2Ficons%2F1930264%2Fcheck_complete_done_green_success_valid_icon&docid=qiUH_zztRe7V2M&tbnid=teuprMWjCcjRLM&vet=12ahUKEwiO6-3psK6LAxXEVWwGHVdvJPUQM3oECBUQAA..i&w=512&h=512&hcb=2&ved=2ahUKEwiO6-3psK6LAxXEVWwGHVdvJPUQM3oECBUQAA"
+        response = requests.get(image_url)
+        
+        if response.status_code != 200:
+            raise Exception("Failed to fetch success image")
 
-    # Draw text on the image
-    draw = ImageDraw.Draw(image)
-    text = f"Pipes Detected: {random.randint(1, 100)}"
-    font = ImageFont.load_default()
-    draw.text((10, 10), text, fill="white", font=font)
+        # Convert image to byte array
+        img_byte_arr = io.BytesIO(response.content)
+        img_byte_arr.seek(0)
 
-    # Convert image to byte array
-    img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format='PNG')
-    img_byte_arr.seek(0)
+        return img_byte_arr  # Return the default success image
 
-    return img_byte_arr  # Return processed image as bytes
+    except Exception as e:
+        print(f"Error fetching success image: {e}")
+        return None
 
 @app.route('/')
 def home():
