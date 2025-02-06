@@ -1,4 +1,4 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,36 +32,27 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _sendImageToBackend() async {
-    if (_image == null) return;
+  if (_image == null) return;
 
-    // Create a request
-    var request = http.MultipartRequest('POST', Uri.parse('https://pipe-counting-app.onrender.com/upload'));
-    
-    // Attach image file
-    request.files.add(await http.MultipartFile.fromPath('file', _image!.path));
+  var request = http.MultipartRequest('POST', Uri.parse('https://pipe-counting-app.onrender.com/upload'));
+  request.files.add(await http.MultipartFile.fromPath('file', _image!.path));
 
-    // Send the request
-    try {
-      var response = await request.send();
+  try {
+    var response = await request.send();
 
-      // Check if the request was successful
-      if (response.statusCode == 200) {
-        // Read the response from the server
-        var responseData = await response.stream.bytesToString();
-        var jsonResponse = jsonDecode(responseData);
-        
-        // Assume the server returns a JSON object with a 'pipe_count' key
-        setState(() {
-          _pipeCount = jsonResponse['pipe_count']; // Adjust based on actual response
-        });
-      } else {
-        // Handle error
-        print('Failed to send image: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
+    if (response.statusCode == 200) {
+      var bytes = await response.stream.toBytes();
+      setState(() {
+        _image = XFile.fromData(bytes); // Update with processed image
+      });
+    } else {
+      print('Failed to process image: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Error: $e');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
