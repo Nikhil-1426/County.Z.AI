@@ -36,9 +36,14 @@ class _HomePageState extends State<HomePage> {
   if (_image == null) return;
 
   var request = http.MultipartRequest(
-      'POST', Uri.parse('https://pipe-counting-app.onrender.com/upload'));
+    'POST', 
+    Uri.parse('https://pipe-counting-app.onrender.com/predict'), // ✅ Correct endpoint
+  );
   
-  request.files.add(await http.MultipartFile.fromPath('file', _image!.path));
+  request.files.add(await http.MultipartFile.fromPath(
+    'file', // ✅ Must match Flask request.files['file']
+    _image!.path,
+  ));
 
   try {
     var response = await request.send();
@@ -53,13 +58,13 @@ class _HomePageState extends State<HomePage> {
       await file.writeAsBytes(bytes);
 
       setState(() {
-        _image = XFile(filePath);  // Use the temporary file path
+        _image = XFile(filePath); // ✅ Use the temporary file path
       });
     } else {
-      print('Failed to process image: ${response.statusCode}');
+      print('❌ Failed to process image: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error: $e');
+    print('❌ Error: $e');
   }
 }
 
