@@ -1,8 +1,9 @@
 Flask==2.1.1
+Flask-Cors
 Pillow==9.0.0
 werkzeug==2.1.1
 requests
-Flask-Cors
-opencv-python
+opencv-python-headless
 ultralytics
 numpy
+torch
