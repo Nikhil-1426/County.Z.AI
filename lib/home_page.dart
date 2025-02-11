@@ -53,13 +53,17 @@ class _HomePageState extends State<HomePage> {
 
       // Save received image to temporary file
       final tempDir = await getTemporaryDirectory();
-      final filePath = '${tempDir.path}/processed_image.png';
+      final filePath = '${tempDir.path}/processed_image_${DateTime.now().millisecondsSinceEpoch}.png';
       File file = File(filePath);
       await file.writeAsBytes(bytes);
 
       setState(() {
         _image = XFile(filePath); // ✅ Use the temporary file path
       });
+
+      // ✅ Force Flutter to reload the image
+      imageCache.clear();
+      imageCache.clearLiveImages();
     } else {
       print('❌ Failed to process image: ${response.statusCode}');
     }

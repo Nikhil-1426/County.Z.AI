@@ -63,7 +63,7 @@ def predict():
             x1, y1, x2, y2 = map(int, xyxy)
             cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green box
             cv2.putText(image, f"Pipe {cls}", (x1, y1 - 10), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # Convert image to PNG format for response
     _, img_encoded = cv2.imencode('.png', image)
