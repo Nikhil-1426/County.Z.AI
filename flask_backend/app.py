@@ -51,6 +51,7 @@ def predict():
     
     # Run inference
     results = model.predict(image, conf=0.5, iou=0.3)
+    pipe_count = len(results[0].boxes)
 
     # Draw bounding boxes on the image
     for result in results:
@@ -69,7 +70,9 @@ def predict():
     _, img_encoded = cv2.imencode('.png', image)
     img_bytes = io.BytesIO(img_encoded.tobytes())
 
-    return send_file(img_bytes, mimetype='image/png')
-
+    return {
+        "pipe_count": pipe_count,
+        "image": img_bytes.getvalue().hex()  # Convert to hex string for sending
+    }
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -1,4 +1,5 @@
-// import 'dart:convert';
+import 'dart:convert';  // ✅ Needed for jsonDecode
+import 'package:convert/convert.dart';  // ✅ Needed for hex decoding
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -33,50 +34,61 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _sendImageToBackend() async {
-  if (_image == null) return;
+    if (_image == null) return;
 
-  var request = http.MultipartRequest(
-    'POST', 
-    Uri.parse('https://pipe-counting-app.onrender.com/predict'), // ✅ Correct endpoint
-  );
-  
-  request.files.add(await http.MultipartFile.fromPath(
-    'file', // ✅ Must match Flask request.files['file']
-    _image!.path,
-  ));
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://pipe-counting-app.onrender.com/predict')
+      , // ✅ Correct endpoint
+    );
 
-  try {
-    var response = await request.send();
+    request.files.add(await http.MultipartFile.fromPath(
+      'file', // ✅ Must match Flask request.files['file']
+      _image!.path,
+    ));
 
-    if (response.statusCode == 200) {
-      var bytes = await response.stream.toBytes();
+    try {
+      var response = await request.send();
 
-      // Save received image to temporary file
-      final tempDir = await getTemporaryDirectory();
-      final filePath = '${tempDir.path}/processed_image_${DateTime.now().millisecondsSinceEpoch}.png';
-      File file = File(filePath);
-      await file.writeAsBytes(bytes);
+      if (response.statusCode == 200) {
+        var responseBody = await response.stream.bytesToString();
+        var jsonResponse = jsonDecode(responseBody);
 
-      setState(() {
-        _image = XFile(filePath); // ✅ Use the temporary file path
-      });
+        int detectedPipes = jsonResponse['pipe_count']; // ✅ Get pipe count
+        String imageHex = jsonResponse['image']; // ✅ Get hex image
 
-      // ✅ Force Flutter to reload the image
-      imageCache.clear();
-      imageCache.clearLiveImages();
-    } else {
-      print('❌ Failed to process image: ${response.statusCode}');
+        // Convert hex string to bytes
+        List<int> imageBytes = hex.decode(imageHex);
+
+        // Save received image to temporary file
+        final tempDir = await getTemporaryDirectory();
+        final filePath =
+            '${tempDir.path}/processed_image_${DateTime.now().millisecondsSinceEpoch}.png';
+        File file = File(filePath);
+        await file.writeAsBytes(imageBytes);
+
+        setState(() {
+          _image = XFile(filePath);
+          _pipeCount = detectedPipes; // ✅ Use the temporary file path
+        });
+
+        // ✅ Force Flutter to reload the image
+        imageCache.clear();
+        imageCache.clearLiveImages();
+      } else {
+        print('❌ Failed to process image: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error: $e');
     }
-  } catch (e) {
-    print('❌ Error: $e');
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pipe Counter", style: TextStyle(fontWeight: FontWeight.bold)),
+        title:
+            Text("Pipe Counter", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.blueAccent,
@@ -96,7 +108,8 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     width: double.infinity,
                     constraints: BoxConstraints(
-                      maxHeight: constraints.maxHeight * 0.4, // Adapts dynamically
+                      maxHeight:
+                          constraints.maxHeight * 0.4, // Adapts dynamically
                     ),
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
@@ -178,8 +191,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: Center(
                       child: Text(
-                        _pipeCount != null ? "Pipes Detected: $_pipeCount" : "No pipe count available",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 97, 91, 91)),
+                        _pipeCount != null
+                            ? "Pipes Detected: $_pipeCount"
+                            : "No pipe count available",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color.fromARGB(255, 97, 91, 91)),
                       ),
                     ),
                   ),
@@ -195,24 +213,36 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Fixed Size Buttons for Send & Remove
-  Widget _buildFixedSizeButton({required IconData icon, required String text, required VoidCallback? onTap, Color color = Colors.blueAccent}) {
+  Widget _buildFixedSizeButton(
+      {required IconData icon,
+      required String text,
+      required VoidCallback? onTap,
+      Color color = Colors.blueAccent}) {
     return SizedBox(
       width: 120, // Ensuring both buttons are the same width
       height: 40, // Same height
       child: ElevatedButton.icon(
         onPressed: onTap,
-        icon: Icon(icon, size: 18, color: const Color.fromARGB(255, 97, 91, 91)),
-        label: Text(text, style: TextStyle(fontSize: 14, color: const Color.fromARGB(255, 97, 91, 91))),
+        icon:
+            Icon(icon, size: 18, color: const Color.fromARGB(255, 97, 91, 91)),
+        label: Text(text,
+            style: TextStyle(
+                fontSize: 14, color: const Color.fromARGB(255, 97, 91, 91))),
         style: ElevatedButton.styleFrom(
-          backgroundColor: onTap != null ? color : Colors.grey[400], // Disabled color
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor:
+              onTap != null ? color : Colors.grey[400], // Disabled color
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
     );
   }
 
   // Large Buttons for Gallery & Camera
-  Widget _buildLargeButton({required IconData icon, required String text, required VoidCallback onTap}) {
+  Widget _buildLargeButton(
+      {required IconData icon,
+      required String text,
+      required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -236,7 +266,10 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 5),
             Text(
               text,
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
             ),
           ],
         ),
