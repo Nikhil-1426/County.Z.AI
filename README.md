@@ -56,6 +56,11 @@ cd Pipe_Counting_App
 flutter run
 ```
 
+# Screenshots
+<pre>
+<img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Homepage.jpg" width = "200">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Output1.jpg" width = "200">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Output2.jpg" width = "200">  <img src= "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Output3.jpg" width = "200">
+</pre>
+
 ### TechStack
 
 1. **Flutter / Dart:**
