@@ -44,7 +44,7 @@ cd ..
 flutter run
 ```
 
-### Setup (For running it through Render)
+### Setup (For running it using Render)
 
 #### Prerequisites:
 - Make sure that the render server is live ( https://pipe-counting-app.onrender.com )
