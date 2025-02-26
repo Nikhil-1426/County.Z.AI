@@ -15,6 +15,7 @@ class _HomePageState extends State<HomePage> {
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
   int? _pipeCount;
+  bool _isLoading = false; // Added loading state
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -35,6 +36,11 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _sendImageToBackend() async {
     if (_image == null) return;
+
+    // Set loading state to true
+    setState(() {
+      _isLoading = true;
+    });
 
     var request = http.MultipartRequest(
       'POST',
@@ -70,6 +76,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _image = XFile(filePath);
           _pipeCount = detectedPipes; // ✅ Use the temporary file path
+          _isLoading = false; // Set loading state to false
         });
 
         // ✅ Force Flutter to reload the image
@@ -77,9 +84,15 @@ class _HomePageState extends State<HomePage> {
         imageCache.clearLiveImages();
       } else {
         print('❌ Failed to process image: ${response.statusCode}');
+        setState(() {
+          _isLoading = false; // Set loading state to false even on error
+        });
       }
     } catch (e) {
       print('❌ Error: $e');
+      setState(() {
+        _isLoading = false; // Set loading state to false even on error
+      });
     }
   }
 
@@ -104,33 +117,69 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   SizedBox(height: 30), // Space from the top bar
 
-                  // Dynamic Image Display
-                  Container(
-                    width: double.infinity,
-                    constraints: BoxConstraints(
-                      maxHeight:
-                          constraints.maxHeight * 0.4, // Adapts dynamically
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: _image != null
-                        ? ClipRRect(
+                  // Dynamic Image Display with Loading Overlay
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        constraints: BoxConstraints(
+                          maxHeight:
+                              constraints.maxHeight * 0.4, // Adapts dynamically
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: _image != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.file(
+                                  File(_image!.path),
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              )
+                            : Center(
+                                child: Icon(
+                                  Icons.image,
+                                  size: 100,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                      ),
+                      // Loading Overlay
+                      if (_isLoading)
+                        Container(
+                          width: double.infinity,
+                          constraints: BoxConstraints(
+                            maxHeight:
+                                constraints.maxHeight * 0.4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(15),
-                            child: Image.file(
-                              File(_image!.path),
-                              width: double.infinity,
-                              fit: BoxFit.contain,
-                            ),
-                          )
-                        : Center(
-                            child: Icon(
-                              Icons.image,
-                              size: 100,
-                              color: Colors.grey[700],
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  "Processing Image...",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                        ),
+                    ],
                   ),
                   SizedBox(height: 15),
 
@@ -141,14 +190,14 @@ class _HomePageState extends State<HomePage> {
                       _buildFixedSizeButton(
                         icon: Icons.send,
                         text: "Send",
-                        onTap: _image != null ? _sendImageToBackend : null,
+                        onTap: (_image != null && !_isLoading) ? _sendImageToBackend : null,
                         color: Colors.green,
                       ),
                       SizedBox(width: 20),
                       _buildFixedSizeButton(
                         icon: Icons.delete,
                         text: "Remove",
-                        onTap: _image != null ? _removeImage : null,
+                        onTap: (_image != null && !_isLoading) ? _removeImage : null,
                         color: Colors.red,
                       ),
                     ],
@@ -163,12 +212,14 @@ class _HomePageState extends State<HomePage> {
                         icon: Icons.image,
                         text: "Gallery",
                         onTap: () => _pickImage(ImageSource.gallery),
+                        isDisabled: _isLoading,
                       ),
                       SizedBox(width: 20),
                       _buildLargeButton(
                         icon: Icons.camera_alt,
                         text: "Camera",
                         onTap: () => _pickImage(ImageSource.camera),
+                        isDisabled: _isLoading,
                       ),
                     ],
                   ),
@@ -242,18 +293,19 @@ class _HomePageState extends State<HomePage> {
   Widget _buildLargeButton(
       {required IconData icon,
       required String text,
-      required VoidCallback onTap}) {
+      required VoidCallback onTap,
+      bool isDisabled = false}) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       child: Container(
         width: 140,
         padding: EdgeInsets.symmetric(vertical: 15),
         decoration: BoxDecoration(
-          color: Colors.blueAccent,
+          color: isDisabled ? Colors.grey[400] : Colors.blueAccent,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.blueAccent.withOpacity(0.3),
+              color: (isDisabled ? Colors.grey : Colors.blueAccent).withOpacity(0.3),
               blurRadius: 8,
               offset: Offset(0, 5),
             ),
