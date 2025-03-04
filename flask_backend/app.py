@@ -12,7 +12,7 @@ from PIL import Image
 app = Flask(__name__)
 CORS(app)
 
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1fjMPKNR958-Fes0FWZYVSEqdQPm9Gdw_"  # Direct Download Link
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1a5A3Db34TmV2CyH9g9FfvxH_upkaDqoa"  # Direct Download Link
 MODEL_PATH = "best.pt"
 
 def download_model():
