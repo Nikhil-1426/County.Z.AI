@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "372484662086",
+    "project_id": "countyzai",
+    "storage_bucket": "countyzai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372484662086:android:e074ba713d124e0f95fb47",
+        "android_client_info": {
+          "package_name": "com.example.pipe_counting_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "372484662086-5obiulokpn1nb78e0hohdnh57g9t6ko6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pipe_counting_app",
+            "certificate_hash": "2eb64b0a3f2e7f47b9684fc136e62b85f121e504"
+          }
+        },
+        {
+          "client_id": "372484662086-el3oanfepj57oeg2nfqlrg5vmhn10cjp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAT0R8lEATR0fGOW3uTcHMxNiL53R4b_2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "372484662086-el3oanfepj57oeg2nfqlrg5vmhn10cjp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
