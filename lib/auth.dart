@@ -22,12 +22,19 @@ class _AuthScreenState extends State<AuthScreen> {
 
   bool _isLoading = false;
   bool _isSignUp = false;
-  bool _isPasswordVisible = false; // New state variable for password visibility
+  bool _isPasswordVisible = false;
 
   @override
   void initState() {
     super.initState();
-    Firebase.initializeApp();
+    _initializeFirebaseAndCheckLogin();
+  }
+
+  Future<void> _initializeFirebaseAndCheckLogin() async {
+    await Firebase.initializeApp();
+    if (_auth.currentUser != null) {
+      _navigateToHomePage();
+    }
   }
 
   void _toggleFormType() {
@@ -103,11 +110,22 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _createUserDocument(User? user) async {
     if (user == null) return;
     final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-    await userRef.set({
-      'email': user.email,
-      'uid': user.uid,
-      'createdAt': Timestamp.now(),
-    }, SetOptions(merge: true));
+    final doc = await userRef.get();
+
+    if (!doc.exists) {
+      await userRef.set({
+        'email': user.email,
+        'uid': user.uid,
+        'createdAt': Timestamp.now(),
+        'counts_used': 0,
+        'hours_logged': 0,
+        'last_login': Timestamp.now(),
+      });
+    } else {
+      await userRef.update({
+        'last_login': Timestamp.now(),
+      });
+    }
   }
 
   void _navigateToHomePage() {
@@ -126,7 +144,7 @@ class _AuthScreenState extends State<AuthScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color.fromARGB(255, 255, 255, 255), Color.fromARGB(255, 239, 221, 247)],
+            colors: [Color(0xFFFFFFFF), Color(0xFFEFDDF7)],
           ),
         ),
         child: Center(
@@ -136,189 +154,58 @@ class _AuthScreenState extends State<AuthScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 500),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Gradient Title
                     GradientText(
                       text: _isSignUp ? "Create Account" : "Welcome Back",
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
-                      ),
+                      style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                      gradient: const LinearGradient(colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)]),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       _isSignUp ? "Sign up to continue" : "Sign in to continue",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFF555555),
-                      ),
+                      style: const TextStyle(fontSize: 18, color: Color(0xFF555555)),
                     ),
                     const SizedBox(height: 32),
                     Form(
                       key: _formKey,
                       child: Column(
                         children: [
-                          // Email Input
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF9D78F9)),
-                              labelText: 'Email',
-                              labelStyle: const TextStyle(color: Color(0xFF9D78F9)),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFF9D78F9), width: 2),
-                              ),
-                            ),
-                            validator: (value) =>
-                                value == null || !value.contains('@') ? 'Enter a valid email' : null,
+                            decoration: _inputDecoration("Email", Icons.email_outlined),
+                            validator: (value) => value == null || !value.contains('@')
+                                ? 'Enter a valid email'
+                                : null,
                           ),
                           const SizedBox(height: 16),
-                          // Password Input with Visibility Toggle
                           TextFormField(
                             controller: _passwordController,
-                            obscureText: !_isPasswordVisible, // Use the new state variable
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF9D78F9)),
-                              labelText: 'Password',
-                              labelStyle: const TextStyle(color: Color(0xFF9D78F9)),
+                            obscureText: !_isPasswordVisible,
+                            decoration: _inputDecoration("Password", Icons.lock_outline).copyWith(
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _isPasswordVisible 
-                                    ? Icons.visibility 
-                                    : Icons.visibility_off,
+                                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                                   color: const Color(0xFF9D78F9),
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isPasswordVisible = !_isPasswordVisible;
-                                  });
-                                },
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFF9D78F9), width: 2),
+                                onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                               ),
                             ),
-                            validator: (value) =>
-                                value == null || value.length < 6 ? 'Minimum 6 characters' : null,
+                            validator: (value) => value == null || value.length < 6
+                                ? 'Minimum 6 characters'
+                                : null,
                           ),
                           const SizedBox(height: 24),
-                          // Submit Button
                           _isLoading
                               ? const CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9D78F9)),
                                 )
-                              : Container(
-                                  width: double.infinity,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFF9D78F9).withOpacity(0.4),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFF9D78F9), Color(0xFF7985FA)],
-                                    ),
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(16),
-                                      onTap: _authenticateWithEmailPassword,
-                                      child: Center(
-                                        child: Text(
-                                          _isSignUp ? 'Sign Up' : 'Sign In',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              : _submitButton(),
                           const SizedBox(height: 24),
-                          // Divider
-                          Row(
-                            children: [
-                              const Expanded(
-                                child: Divider(
-                                  color: Color(0xFFE0E0E0),
-                                  thickness: 1,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                child: Text(
-                                  'or',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              const Expanded(
-                                child: Divider(
-                                  color: Color(0xFFE0E0E0),
-                                  thickness: 1,
-                                ),
-                              ),
-                            ],
-                          ),
+                          _dividerWithOr(),
                           const SizedBox(height: 24),
-                          // Google Sign In Button
-                          OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFFE0E0E0)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              minimumSize: const Size(double.infinity, 60),
-                            ),
-                            onPressed: _signInWithGoogle,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.network(
-                                  'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                                  height: 24,
-                                  width: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  'Sign in with Google',
-                                  style: TextStyle(
-                                    color: Colors.grey[800],
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          _googleSignInButton(),
                           const SizedBox(height: 16),
-                          // Toggle Between Sign In and Sign Up
                           TextButton(
                             onPressed: _toggleFormType,
                             child: Text(
@@ -344,9 +231,100 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
     );
   }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      prefixIcon: Icon(icon, color: const Color(0xFF9D78F9)),
+      labelText: label,
+      labelStyle: const TextStyle(color: Color(0xFF9D78F9)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF9D78F9), width: 2),
+      ),
+    );
+  }
+
+  Widget _submitButton() {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(colors: [Color(0xFF9D78F9), Color(0xFF7985FA)]),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF9D78F9).withOpacity(0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: _authenticateWithEmailPassword,
+          child: Center(
+            child: Text(
+              _isSignUp ? 'Sign Up' : 'Sign In',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dividerWithOr() {
+    return Row(
+      children: [
+        const Expanded(child: Divider(color: Color(0xFFE0E0E0), thickness: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text('or', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+        ),
+        const Expanded(child: Divider(color: Color(0xFFE0E0E0), thickness: 1)),
+      ],
+    );
+  }
+
+  Widget _googleSignInButton() {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        side: const BorderSide(color: Color(0xFFE0E0E0)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        minimumSize: const Size(double.infinity, 60),
+      ),
+      onPressed: _signInWithGoogle,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.network(
+            'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+            height: 24,
+            width: 24,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Sign in with Google',
+            style: TextStyle(color: Colors.grey[800], fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-// Gradient text widget (copied from loading_screen.dart)
+// Gradient text widget
 class GradientText extends StatelessWidget {
   final String text;
   final TextStyle style;

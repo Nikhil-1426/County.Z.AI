@@ -268,3 +268,4 @@ class GradientText extends StatelessWidget {
     );
   }
 }
+
