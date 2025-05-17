@@ -47,9 +47,12 @@ class _HomePageState extends State<HomePage> {
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(userDoc);
       final currentSessions = (snapshot.data()?['total_sessions'] ?? 0) as int;
-      transaction.set(userDoc, {
-        'total_sessions': currentSessions + 1,
-      }, SetOptions(merge: true));
+      transaction.set(
+          userDoc,
+          {
+            'total_sessions': currentSessions + 1,
+          },
+          SetOptions(merge: true));
     });
   }
 
@@ -61,9 +64,12 @@ class _HomePageState extends State<HomePage> {
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(userDoc);
       final currentMinutes = (snapshot.data()?['minutes_logged'] ?? 0) as int;
-      transaction.set(userDoc, {
-        'minutes_logged': currentMinutes + 1,
-      }, SetOptions(merge: true));
+      transaction.set(
+          userDoc,
+          {
+            'minutes_logged': currentMinutes + 1,
+          },
+          SetOptions(merge: true));
     });
   }
 
@@ -71,7 +77,8 @@ class _HomePageState extends State<HomePage> {
     final uid = user?.uid;
     if (uid == null) return;
 
-    final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
     if (mounted) {
       setState(() {
         userData = doc.data() ?? {};
@@ -87,14 +94,18 @@ class _HomePageState extends State<HomePage> {
       {
         'title': 'Start Counting',
         'subtitle': 'Ready to begin tracking?',
-        'imageUrl': 'https://cdn4.iconfinder.com/data/icons/object-detection-technology/24/material_scan_reader_recognition_3D_object_detection-512.png',
+        'imageUrl':
+            'https://cdn4.iconfinder.com/data/icons/object-detection-technology/24/material_scan_reader_recognition_3D_object_detection-512.png',
         'route': '/count',
         'hideButton': false,
+        'imageHeight': 75.0, // <-- Custom height
+        'imageWidth': 75.0, // <-- Custom width
       },
       {
         'title': 'Recent Activity',
         'subtitle': '', // Set later
-        'imageUrl': 'https://cdn2.iconfinder.com/data/icons/thin-outline-essential-ui/25/39-512.png',
+        'imageUrl':
+            'https://cdn2.iconfinder.com/data/icons/thin-outline-essential-ui/25/39-512.png',
         'route': '/history',
         'hideButton': false,
         'buttonText': 'View History',
@@ -154,7 +165,8 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 4),
                         Text(
                           email,
-                          style: const TextStyle(fontSize: 16, color: Color(0xFF888888)),
+                          style: const TextStyle(
+                              fontSize: 16, color: Color(0xFF888888)),
                         ),
                       ],
                     ),
@@ -218,14 +230,18 @@ class _HomePageState extends State<HomePage> {
                       },
                       hideButton: feature['hideButton'] ?? false,
                       buttonText: feature['buttonText'] ?? "Explore",
+                      imageHeight: feature['imageHeight'],
+                      imageWidth: feature['imageWidth'],
                     ),
                   ),
 
                 // User Stats Card
                 _buildFeatureCard(
                   title: "User Stats",
-                  subtitle: "Minutes logged: $minutesLogged\nCounts used: $countUsed\nSessions: $totalSessions",
-                  imageUrl: 'https://static.thenounproject.com/png/4963515-200.png',
+                  subtitle:
+                      "Minutes logged: $minutesLogged\nCounts used: $countUsed\nSessions: $totalSessions",
+                  imageUrl:
+                      'https://static.thenounproject.com/png/4963515-200.png',
                   onTap: () {},
                   hideButton: true,
                 ),
@@ -244,7 +260,29 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onTap,
     bool hideButton = false,
     String buttonText = "Explore",
+    double? imageHeight,
+    double? imageWidth,
   }) {
+    Widget imageWidget = ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(16),
+        bottomRight: Radius.circular(16),
+      ),
+      child: Image.network(
+        imageUrl,
+        height: imageHeight ?? 100,
+        width: imageWidth ?? 100,
+        fit: BoxFit.cover,
+      ),
+    );
+
+    if (title == "Start Counting") {
+      imageWidget = Padding(
+        padding: const EdgeInsets.only(right: 12), // Add custom right margin
+        child: imageWidget,
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -266,16 +304,23 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF444444))),
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF444444))),
                   const SizedBox(height: 8),
-                  Text(subtitle, style: const TextStyle(fontSize: 14, color: Color(0xFF888888))),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          fontSize: 14, color: Color(0xFF888888))),
                   if (!hideButton) ...[
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: onTap,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF9D78F9),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(buttonText),
                     ),
@@ -284,18 +329,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-            ),
-            child: Image.network(
-              imageUrl,
-              height: 120,
-              width: 120,
-              fit: BoxFit.cover,
-            ),
-          ),
+          imageWidget,
         ],
       ),
     );
