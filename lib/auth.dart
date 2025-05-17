@@ -118,7 +118,7 @@ class _AuthScreenState extends State<AuthScreen> {
         'uid': user.uid,
         'createdAt': Timestamp.now(),
         'counts_used': 0,
-        'hours_logged': 0,
+        'minutes_logged': 0,
         'last_login': Timestamp.now(),
       });
     } else {

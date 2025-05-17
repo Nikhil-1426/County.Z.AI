@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,25 +13,74 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String searchText = "";
+  Map<String, dynamic> userData = {};
+  Timer? _timer;
+  final user = FirebaseAuth.instance.currentUser;
 
-  Future<Map<String, dynamic>> getUserData() async {
-    final user = FirebaseAuth.instance.currentUser;
+  @override
+  void initState() {
+    super.initState();
+    _initializeUserDataAndStartTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initializeUserDataAndStartTimer() async {
+    await _incrementSession();
+    await _fetchUserData();
+
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) async {
+      await _incrementMinutesLogged();
+      await _fetchUserData(); // Update UI
+    });
+  }
+
+  Future<void> _incrementSession() async {
     final uid = user?.uid;
+    if (uid == null) return;
 
-    if (uid == null) return {};
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(uid);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(userDoc);
+      final currentSessions = (snapshot.data()?['total_sessions'] ?? 0) as int;
+      transaction.set(userDoc, {
+        'total_sessions': currentSessions + 1,
+      }, SetOptions(merge: true));
+    });
+  }
 
-    // Update last login timestamp
-    await FirebaseFirestore.instance.collection('users').doc(uid).set({
-      'last_login': Timestamp.now(),
-    }, SetOptions(merge: true));
+  Future<void> _incrementMinutesLogged() async {
+    final uid = user?.uid;
+    if (uid == null) return;
+
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(uid);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(userDoc);
+      final currentMinutes = (snapshot.data()?['minutes_logged'] ?? 0) as int;
+      transaction.set(userDoc, {
+        'minutes_logged': currentMinutes + 1,
+      }, SetOptions(merge: true));
+    });
+  }
+
+  Future<void> _fetchUserData() async {
+    final uid = user?.uid;
+    if (uid == null) return;
 
     final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    return doc.data() ?? {};
+    if (mounted) {
+      setState(() {
+        userData = doc.data() ?? {};
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
     final String email = user?.email ?? "User";
 
     final List<Map<String, dynamic>> allFeatures = [
@@ -43,13 +93,28 @@ class _HomePageState extends State<HomePage> {
       },
       {
         'title': 'Recent Activity',
-        'subtitle': 'Last login info below',
+        'subtitle': '', // Set later
         'imageUrl': 'https://cdn2.iconfinder.com/data/icons/thin-outline-essential-ui/25/39-512.png',
         'route': '/history',
         'hideButton': false,
         'buttonText': 'View History',
       },
     ];
+
+    final countUsed = userData['counts_used'] ?? 0;
+    final minutesLogged = userData['minutes_logged'] ?? 0;
+    final totalSessions = userData['total_sessions'] ?? 0;
+
+    final lastCountTimestamp = userData['last_count_time'];
+    final lastCount = lastCountTimestamp != null
+        ? (lastCountTimestamp as Timestamp).toDate().toString()
+        : "N/A";
+
+    allFeatures[1]['subtitle'] = "Last count: $lastCount";
+
+    final filteredFeatures = allFeatures.where((feature) {
+      return feature['title'].toLowerCase().contains(searchText.toLowerCase());
+    }).toList();
 
     return Scaffold(
       body: Container(
@@ -66,129 +131,106 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         child: SafeArea(
-          child: FutureBuilder<Map<String, dynamic>>(
-            future: getUserData(),
-            builder: (context, snapshot) {
-              final userData = snapshot.data ?? {};
-              final countUsed = userData['counts_used'] ?? 0;
-              final hoursLogged = userData['hours_logged']?.toString() ?? "0";
-              final lastLoginTimestamp = userData['last_login'];
-              final lastLogin = lastLoginTimestamp != null
-                  ? (lastLoginTimestamp as Timestamp).toDate().toString()
-                  : "N/A";
-
-              final filteredFeatures = allFeatures.where((feature) {
-                return feature['title'].toLowerCase().contains(searchText.toLowerCase());
-              }).toList();
-
-              return Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                    child: Column(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Home",
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF555555),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  email,
-                                  style: const TextStyle(fontSize: 16, color: Color(0xFF888888)),
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.logout, color: Colors.grey),
-                              onPressed: () async {
-                                await FirebaseAuth.instance.signOut();
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const AuthScreen()),
-                                );
-                              },
-                            )
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Search Bar
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 6,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              hintText: "Search features",
-                              border: InputBorder.none,
-                              icon: Icon(Icons.search),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                searchText = value;
-                              });
-                            },
+                        const Text(
+                          "Home",
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF555555),
                           ),
                         ),
-
-                        const SizedBox(height: 24),
-
-                        // Feature Cards (filtered)
-                        for (var feature in filteredFeatures)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: _buildFeatureCard(
-                              title: feature['title'],
-                              subtitle: feature['title'] == 'Recent Activity'
-                                  ? "Last login: $lastLogin"
-                                  : feature['subtitle'],
-                              imageUrl: feature['imageUrl'],
-                              onTap: () {
-                                if (feature['route'] != null) {
-                                  Navigator.pushNamed(context, feature['route']);
-                                }
-                              },
-                              hideButton: feature['hideButton'] ?? false,
-                              buttonText: feature['buttonText'] ?? "Explore",
-                            ),
-                          ),
-
-                        // User Stats Card
-                        _buildFeatureCard(
-                          title: "User Stats",
-                          subtitle: "Hours logged: $hoursLogged\nCounts used: $countUsed",
-                          imageUrl: 'https://static.thenounproject.com/png/4963515-200.png',
-                          onTap: () {},
-                          hideButton: true,
+                        const SizedBox(height: 4),
+                        Text(
+                          email,
+                          style: const TextStyle(fontSize: 16, color: Color(0xFF888888)),
                         ),
                       ],
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.logout, color: Colors.grey),
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AuthScreen()),
+                        );
+                      },
+                    )
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Search Bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              );
-            },
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: "Search features",
+                      border: InputBorder.none,
+                      icon: Icon(Icons.search),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        searchText = value;
+                      });
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Feature Cards
+                for (var feature in filteredFeatures)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _buildFeatureCard(
+                      title: feature['title'],
+                      subtitle: feature['subtitle'],
+                      imageUrl: feature['imageUrl'],
+                      onTap: () {
+                        if (feature['route'] != null) {
+                          Navigator.pushNamed(context, feature['route']);
+                        }
+                      },
+                      hideButton: feature['hideButton'] ?? false,
+                      buttonText: feature['buttonText'] ?? "Explore",
+                    ),
+                  ),
+
+                // User Stats Card
+                _buildFeatureCard(
+                  title: "User Stats",
+                  subtitle: "Minutes logged: $minutesLogged\nCounts used: $countUsed\nSessions: $totalSessions",
+                  imageUrl: 'https://static.thenounproject.com/png/4963515-200.png',
+                  onTap: () {},
+                  hideButton: true,
+                ),
+              ],
+            ),
           ),
         ),
       ),
