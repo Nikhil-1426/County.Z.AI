@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pipe_counting_app/loading_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:pipe_counting_app/info.dart'; // Fixed import statement
 
 
 void main() async {
@@ -21,7 +22,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: LoadingScreen(), // Fixed incorrect class reference
+      home: LoadingScreen(),
+      routes: {
+        '/info': (context) => const InfoPage(),
+      }
     );
   }
 }

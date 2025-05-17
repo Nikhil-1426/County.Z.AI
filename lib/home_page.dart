@@ -150,6 +150,7 @@ class _HomePageState extends State<HomePage> {
                 // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,15 +171,25 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.logout, color: Colors.grey),
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const AuthScreen()),
-                        );
-                      },
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.info_outline, color: Colors.grey),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/info');
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.logout, color: Colors.grey),
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            );
+                          },
+                        ),
+                      ],
                     )
                   ],
                 ),
