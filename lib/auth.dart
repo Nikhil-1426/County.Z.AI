@@ -134,6 +134,30 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      _showErrorDialog("Enter a valid email to reset your password.");
+      return;
+    }
+
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Password Reset"),
+          content: const Text("Check your email for password reset instructions."),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text("OK")),
+          ],
+        ),
+      );
+    } catch (e) {
+      _showErrorDialog("Failed to send password reset email: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,7 +219,22 @@ class _AuthScreenState extends State<AuthScreen> {
                                 ? 'Minimum 6 characters'
                                 : null,
                           ),
-                          const SizedBox(height: 24),
+                          if (!_isSignUp)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: _resetPassword,
+                                child: const Text(
+                                  "Forgot Password?",
+                                  style: TextStyle(
+                                    color: Color(0xFF9D78F9),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 8),
                           _isLoading
                               ? const CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9D78F9)),
