@@ -453,8 +453,8 @@ class _AuthScreenState extends State<AuthScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset(
-              'assets/google.svg',
+            SvgPicture.network(
+              'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
               height: 24,
               width: 24,
             ),
