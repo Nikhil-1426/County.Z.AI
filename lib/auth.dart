@@ -81,9 +81,8 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _loadRememberedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     final remembered = prefs.getBool('rememberMe') ?? false;
-    if (remembered) {
+    if (remembered && prefs.getString('loginType') == 'email') {
       setState(() {
-        _rememberMe = true;
         _emailController.text = prefs.getString('email') ?? '';
         _passwordController.text = prefs.getString('password') ?? '';
       });
