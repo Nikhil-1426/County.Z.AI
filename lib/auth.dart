@@ -29,6 +29,7 @@ class AuthScreen extends StatefulWidget {
     await prefs.remove('email');
     await prefs.remove('password');
     await prefs.remove('rememberMe');
+    await prefs.remove('loginType'); // Clear login type
     // Navigate to AuthScreen
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AuthScreen()),
@@ -57,18 +58,24 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _initializeFirebaseAndCheckLogin() async {
     await Firebase.initializeApp();
-    await _loadRememberedCredentials();
-
+    
     final user = _auth.currentUser;
     if (user != null) {
+      // Check if user should be remembered (check Firestore)
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (doc.exists && doc.data()?['rememberMe'] == true) {
+        // User should stay signed in
         _navigateToHomePage();
+        return;
       } else {
+        // User shouldn't be remembered, sign them out
         await _auth.signOut();
         await _googleSignIn.signOut();
       }
     }
+    
+    // Load remembered credentials for form filling (but don't auto-sign in)
+    await _loadRememberedCredentials();
   }
 
   Future<void> _loadRememberedCredentials() async {
@@ -121,7 +128,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
 
       await _createUserDocument(userCredential.user);
-      await _handleRememberMeStorage();
+      await _handleRememberMeStorage(loginType: 'email');
       _navigateToHomePage();
     } on FirebaseAuthException catch (e) {
       _showErrorDialog(e.message ?? "Authentication error");
@@ -131,43 +138,35 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  try {
-    // Sign out from any previously signed-in Google account
-    await _googleSignIn.signOut();
+    try {
+      // Always sign out first to ensure account selection prompt appears
+      await _googleSignIn.signOut();
+      
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
 
-    // Create a new GoogleSignIn instance with `forceCodeForRefreshToken`
-    final googleSignIn = GoogleSignIn(
-      scopes: ['email'],
-      forceCodeForRefreshToken: true,
-    );
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-    // Force account selection by using signIn() after signOut()
-    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-    if (googleUser == null) {
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      await _createUserDocument(userCredential.user);
+      await _handleRememberMeStorage(loginType: 'google', email: googleUser.email);
+      _navigateToHomePage();
+    } catch (e) {
+      _showErrorDialog("Google Sign-In failed: $e");
+    } finally {
       setState(() => _isLoading = false);
-      return; // User canceled the sign-in flow
     }
-
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final userCredential = await _auth.signInWithCredential(credential);
-    await _createUserDocument(userCredential.user);
-    await _handleRememberMeStorage(google: true, email: googleUser.email);
-    _navigateToHomePage();
-  } catch (e) {
-    _showErrorDialog("Google Sign-In failed: $e");
-  } finally {
-    setState(() => _isLoading = false);
   }
-}
-
 
   Future<void> _createUserDocument(User? user) async {
     if (user == null) return;
@@ -193,18 +192,20 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   /// Handles storing or clearing credentials in shared_preferences
-  Future<void> _handleRememberMeStorage({bool google = false, String? email}) async {
+  Future<void> _handleRememberMeStorage({required String loginType, String? email}) async {
     final prefs = await SharedPreferences.getInstance();
     if (_rememberMe) {
       await prefs.setBool('rememberMe', true);
+      await prefs.setString('loginType', loginType);
       await prefs.setString('email', email ?? _emailController.text.trim());
-      if (!google) {
+      if (loginType == 'email') {
         await prefs.setString('password', _passwordController.text.trim());
       } else {
         await prefs.remove('password'); // Don't store password for Google sign-in
       }
     } else {
       await prefs.remove('rememberMe');
+      await prefs.remove('loginType');
       await prefs.remove('email');
       await prefs.remove('password');
     }
