@@ -131,29 +131,43 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
+  setState(() => _isLoading = true);
 
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
+  try {
+    // Sign out from any previously signed-in Google account
+    await _googleSignIn.signOut();
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    // Create a new GoogleSignIn instance with `forceCodeForRefreshToken`
+    final googleSignIn = GoogleSignIn(
+      scopes: ['email'],
+      forceCodeForRefreshToken: true,
+    );
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      await _createUserDocument(userCredential.user);
-      await _handleRememberMeStorage(google: true, email: googleUser.email);
-      _navigateToHomePage();
-    } catch (e) {
-      _showErrorDialog("Google Sign-In failed: $e");
-    } finally {
+    // Force account selection by using signIn() after signOut()
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if (googleUser == null) {
       setState(() => _isLoading = false);
+      return; // User canceled the sign-in flow
     }
+
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential = await _auth.signInWithCredential(credential);
+    await _createUserDocument(userCredential.user);
+    await _handleRememberMeStorage(google: true, email: googleUser.email);
+    _navigateToHomePage();
+  } catch (e) {
+    _showErrorDialog("Google Sign-In failed: $e");
+  } finally {
+    setState(() => _isLoading = false);
   }
+}
+
 
   Future<void> _createUserDocument(User? user) async {
     if (user == null) return;
