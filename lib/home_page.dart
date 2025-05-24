@@ -149,38 +149,52 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Header
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Home",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF555555),
+                    // Wrap this in Flexible to avoid overflow
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Home",
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF555555),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          email,
-                          style: const TextStyle(
-                              fontSize: 16, color: Color(0xFF888888)),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            email,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF888888),
+                              overflow: TextOverflow.ellipsis, // truncate long emails
+                            ),
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
                     ),
+                    // Align icons at top
                     Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.info_outline, color: Colors.grey),
+                          padding: EdgeInsets.zero, // reduce padding
+                          constraints: const BoxConstraints(), // remove extra constraints
                           onPressed: () {
                             Navigator.pushNamed(context, '/info');
                           },
                         ),
                         IconButton(
                           icon: const Icon(Icons.logout, color: Colors.grey),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                           onPressed: () async {
                             await FirebaseAuth.instance.signOut();
                             Navigator.pushReplacement(
@@ -190,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                           },
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
 
