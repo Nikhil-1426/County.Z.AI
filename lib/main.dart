@@ -31,7 +31,8 @@ class MyApp extends StatelessWidget {
           '/count': (context) => const CountPage(),
           '/history': (context) => const HistoryPage(),
           '/auth': (context) =>
-              const AuthScreen(), // Placeholder for history page
+              const AuthScreen(), 
+           '/home_page': (context) => HomePage(),// Placeholder for history page
         });
   }
 }
