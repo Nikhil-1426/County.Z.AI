@@ -8,7 +8,20 @@ import 'home_page.dart';
 import 'count.dart';
 import 'history.dart';
 import 'info.dart';
+class HistoryPage extends StatelessWidget {
+  final String userId;
 
+  const HistoryPage({Key? key, required this.userId}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Use userId here or ignore it if not needed
+    return Scaffold(
+      appBar: AppBar(title: const Text('History')),
+      body: Center(child: Text('User ID: $userId')),
+    );
+  }
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
