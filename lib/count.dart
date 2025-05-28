@@ -43,7 +43,7 @@ class _CountPageState extends State<CountPage> {
 
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.1.103:5000/predict'),
+      Uri.parse('https://county-z-ai.onrender.com/predict'),
     );
 
     request.files.add(await http.MultipartFile.fromPath(
