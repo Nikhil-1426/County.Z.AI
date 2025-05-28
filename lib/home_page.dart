@@ -98,8 +98,8 @@ class _HomePageState extends State<HomePage> {
             'https://cdn4.iconfinder.com/data/icons/object-detection-technology/24/material_scan_reader_recognition_3D_object_detection-512.png',
         'route': '/count',
         'hideButton': false,
-        'imageHeight': 75.0, // <-- Custom height
-        'imageWidth': 75.0, // <-- Custom width
+        'imageHeight': 60.0,
+        'imageWidth': 60.0,
       },
       {
         'title': 'Recent Activity',
@@ -109,6 +109,8 @@ class _HomePageState extends State<HomePage> {
         'route': '/history',
         'hideButton': false,
         'buttonText': 'View History',
+        'imageHeight': 60.0,
+        'imageWidth': 60.0,
       },
     ];
 
@@ -136,142 +138,167 @@ class _HomePageState extends State<HomePage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color.fromARGB(255, 255, 255, 255),
-              Color.fromARGB(255, 239, 221, 247),
+              Color(0xFF9D78F9),
+              Color(0xFF78BDF9),
             ],
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              // Header with user info and actions
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Wrap this in Flexible to avoid overflow
-                    Flexible(
+                    // User info
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            "Home",
+                            "Welcome Back!",
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 27,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF555555),
+                              color: Colors.white,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             email,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF888888),
-                              overflow: TextOverflow.ellipsis, // truncate long emails
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.white.withOpacity(0.9),
                             ),
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
-                    // Align icons at top
+                    // Action buttons
                     Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.info_outline, color: Colors.grey),
-                          padding: EdgeInsets.zero, // reduce padding
-                          constraints: const BoxConstraints(), // remove extra constraints
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/info');
-                          },
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.info_outline, color: Colors.white),
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/info');
+                            },
+                          ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.logout, color: Colors.grey),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => const AuthScreen()),
-                            );
-                          },
+                        const SizedBox(width: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.logout, color: Colors.white),
+                            onPressed: () async {
+                              await FirebaseAuth.instance.signOut();
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => const AuthScreen()),
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 20),
-
-                // Search Bar
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              const SizedBox(height: 24),
+              // Main content area
+              Flexible(
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: Offset(0, 2),
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, -5),
                       ),
                     ],
                   ),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: "Search features",
-                      border: InputBorder.none,
-                      icon: Icon(Icons.search),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Search Bar
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: Colors.grey.shade500,
+                              ),
+                              hintText: "Search features",
+                              hintStyle: TextStyle(color: Colors.grey.shade500),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                searchText = value;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Feature Cards
+                        for (var feature in filteredFeatures)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _buildFeatureCard(
+                              title: feature['title'],
+                              subtitle: feature['subtitle'],
+                              imageUrl: feature['imageUrl'],
+                              onTap: () {
+                                if (feature['route'] != null) {
+                                  Navigator.pushNamed(context, feature['route']);
+                                }
+                              },
+                              hideButton: feature['hideButton'] ?? false,
+                              buttonText: feature['buttonText'] ?? "Explore",
+                              imageHeight: feature['imageHeight'],
+                              imageWidth: feature['imageWidth'],
+                            ),
+                          ),
+                        // User Stats Card
+                        _buildStatsCard(
+                          minutesLogged: minutesLogged,
+                          countUsed: countUsed,
+                          totalSessions: totalSessions,
+                        ),
+                      ],
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        searchText = value;
-                      });
-                    },
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // Feature Cards
-                for (var feature in filteredFeatures)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildFeatureCard(
-                      title: feature['title'],
-                      subtitle: feature['subtitle'],
-                      imageUrl: feature['imageUrl'],
-                      onTap: () {
-                        if (feature['route'] != null) {
-                          Navigator.pushNamed(context, feature['route']);
-                        }
-                      },
-                      hideButton: feature['hideButton'] ?? false,
-                      buttonText: feature['buttonText'] ?? "Explore",
-                      imageHeight: feature['imageHeight'],
-                      imageWidth: feature['imageWidth'],
-                    ),
-                  ),
-
-                // User Stats Card
-                _buildFeatureCard(
-                  title: "User Stats",
-                  subtitle:
-                      "Minutes logged: $minutesLogged\nCounts used: $countUsed\nSessions: $totalSessions",
-                  imageUrl:
-                      'https://static.thenounproject.com/png/4963515-200.png',
-                  onTap: () {},
-                  hideButton: true,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -288,75 +315,232 @@ class _HomePageState extends State<HomePage> {
     double? imageHeight,
     double? imageWidth,
   }) {
-    Widget imageWidget = ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
-      ),
-      child: Image.network(
-        imageUrl,
-        height: imageHeight ?? 100,
-        width: imageWidth ?? 100,
-        fit: BoxFit.cover,
-      ),
-    );
-
-    if (title == "Start Counting") {
-      imageWidget = Padding(
-        padding: const EdgeInsets.only(right: 12), // Add custom right margin
-        child: imageWidget,
-      );
-    }
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 4),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF444444))),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF444444),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(subtitle,
-                      style: const TextStyle(
-                          fontSize: 14, color: Color(0xFF888888))),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (!hideButton) ...[
                     const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: onTap,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF9D78F9),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                    Container(
+                      height: 36,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF9D78F9).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: Text(buttonText),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: onTap,
+                          child: Center(
+                            child: Text(
+                              buttonText,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ]
                 ],
               ),
             ),
-          ),
-          imageWidget,
-        ],
+            const SizedBox(width: 12),
+            Container(
+              width: imageWidth ?? 60,
+              height: imageHeight ?? 60,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.image_not_supported_outlined,
+                      color: Colors.grey.shade400,
+                      size: 30,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildStatsCard({
+    required int minutesLogged,
+    required int countUsed,
+    required int totalSessions,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF9D78F9).withOpacity(0.1),
+            const Color(0xFF78BDF9).withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF9D78F9).withOpacity(0.2)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.analytics_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  "User Stats",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF444444),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatItem(
+                    "Minutes",
+                    minutesLogged.toString(),
+                    Icons.timer_outlined,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 40,
+                  color: Colors.grey.shade300,
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    "Counts",
+                    countUsed.toString(),
+                    Icons.confirmation_number_outlined,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 40,
+                  color: Colors.grey.shade300,
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    "Sessions",
+                    totalSessions.toString(),
+                    Icons.insights_outlined,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          color: const Color(0xFF9D78F9),
+          size: 24,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF444444),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }

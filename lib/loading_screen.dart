@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:pipe_counting_app/auth.dart';
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({Key? key}) : super(key: key);
+  const LoadingScreen({super.key});
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -95,6 +95,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+                             
                               color: Colors.white.withOpacity(0.4),
                               blurRadius: 25,
                               spreadRadius: 8,
