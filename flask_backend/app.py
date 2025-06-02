@@ -3,15 +3,16 @@ import numpy as np
 import io
 import os
 import requests
+import torch
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
 from flask_cors import CORS
-from PIL import Image
+from torchvision.ops import nms
 
 app = Flask(__name__)
 CORS(app)
 
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1a5A3Db34TmV2CyH9g9FfvxH_upkaDqoa"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=12QhVOMkVyR_JweTmf-KydK1s15ZqQn6p"
 MODEL_PATH = "best.pt"
 
 def download_model():
@@ -33,7 +34,6 @@ def read_image(file_storage):
     return image
 
 def split_image_into_tiles(image, rows=2, cols=2):
-    """Split image into (rows x cols) tiles and return list of tiles and their positions"""
     h, w = image.shape[:2]
     tile_h, tile_w = h // rows, w // cols
     tiles = []
@@ -44,8 +44,14 @@ def split_image_into_tiles(image, rows=2, cols=2):
             x1 = c * tile_w
             x2 = (c + 1) * tile_w if c < cols - 1 else w
             tile = image[y1:y2, x1:x2]
-            tiles.append((tile, (x1, y1)))  # Keep tile and its top-left position in original image
+            tiles.append((tile, (x1, y1)))
     return tiles
+
+def apply_global_nms(boxes, scores, iou_threshold=0.5):
+    boxes_tensor = torch.tensor(boxes, dtype=torch.float32)
+    scores_tensor = torch.tensor(scores, dtype=torch.float32)
+    keep_indices = nms(boxes_tensor, scores_tensor, iou_threshold)
+    return keep_indices.cpu().numpy().tolist()
 
 @app.route('/')
 def home():
@@ -58,51 +64,51 @@ def predict():
     
     file = request.files['file']
     image = read_image(file)
-    
     tiles = split_image_into_tiles(image, rows=2, cols=2)
     
-    total_boxes = []
+    boxes_all = []
+    scores_all = []
+    classes_all = []
     
-    # Run detection on each tile and adjust box coordinates to original image
     for tile_img, (offset_x, offset_y) in tiles:
         results = model.predict(tile_img, conf=0.5, iou=0.3)
-        
         for result in results:
             for box in result.boxes:
-                # Get box coordinates relative to the tile
-                xyxy = box.xyxy.cpu().numpy()[0]  # (x1, y1, x2, y2)
-                conf = box.conf.cpu().numpy()[0]
+                xyxy = box.xyxy.cpu().numpy()[0]
+                conf = float(box.conf.cpu().numpy()[0])
                 cls = int(box.cls.cpu().numpy()[0])
                 
-                # Adjust box coordinates to full image
-                x1 = int(xyxy[0] + offset_x)
-                y1 = int(xyxy[1] + offset_y)
-                x2 = int(xyxy[2] + offset_x)
-                y2 = int(xyxy[3] + offset_y)
+                # Adjust box to full image coords
+                x1 = float(xyxy[0] + offset_x)
+                y1 = float(xyxy[1] + offset_y)
+                x2 = float(xyxy[2] + offset_x)
+                y2 = float(xyxy[3] + offset_y)
                 
-                total_boxes.append({
-                    "box": (x1, y1, x2, y2),
-                    "conf": conf,
-                    "cls": cls
-                })
+                boxes_all.append([x1, y1, x2, y2])
+                scores_all.append(conf)
+                classes_all.append(cls)
     
-    pipe_count = len(total_boxes)
+    if boxes_all:
+        keep_indices = apply_global_nms(boxes_all, scores_all, iou_threshold=0.5)
+    else:
+        keep_indices = []
     
-    # Draw boxes on original image
-    for item in total_boxes:
-        x1, y1, x2, y2 = item["box"]
-        cls = item["cls"]
-        conf = item["conf"]
-        
+    filtered_boxes = [boxes_all[i] for i in keep_indices]
+    filtered_scores = [scores_all[i] for i in keep_indices]
+    filtered_classes = [classes_all[i] for i in keep_indices]
+    
+    pipe_count = len(filtered_boxes)
+    
+    # Draw filtered boxes
+    for box, conf, cls in zip(filtered_boxes, filtered_scores, filtered_classes):
+        x1, y1, x2, y2 = map(int, box)
         cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(image, f"Pipe {cls} {conf:.2f}", (x1, y1 - 10), 
+        cv2.putText(image, f"Pipe {cls} {conf:.2f}", (x1, y1 - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
     
-    # Encode image to PNG for sending back
     _, img_encoded = cv2.imencode('.png', image)
     img_bytes = io.BytesIO(img_encoded.tobytes())
-    
-    # Return pipe count and image hex string (can be decoded in Flutter)
+
     return jsonify({
         "pipe_count": pipe_count,
         "image": img_bytes.getvalue().hex()
