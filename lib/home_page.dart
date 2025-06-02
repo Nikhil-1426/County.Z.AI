@@ -181,38 +181,46 @@ class _HomePageState extends State<HomePage> {
                     ),
                     // Action buttons
                     Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.info_outline, color: Colors.white),
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/info');
-                            },
-                          ),
+                    children: [
+                      Container(
+                        width: 40, // smaller container size
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.logout, color: Colors.white),
-                            onPressed: () async {
-                              await FirebaseAuth.instance.signOut();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => const AuthScreen()),
-                              );
-                            },
-                          ),
+                        child: IconButton(
+                          iconSize: 21, // smaller icon
+                          padding: EdgeInsets.zero, // remove default padding
+                          icon: const Icon(Icons.info_outline, color: Colors.white),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/info');
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          iconSize: 21,
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  )
                   ],
                 ),
               ),
@@ -239,35 +247,6 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Search Bar
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade200),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: Colors.grey.shade500,
-                              ),
-                              hintText: "Search features",
-                              hintStyle: TextStyle(color: Colors.grey.shade500),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                searchText = value;
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 24),
                         // Feature Cards
                         for (var feature in filteredFeatures)
                           Padding(
@@ -278,7 +257,8 @@ class _HomePageState extends State<HomePage> {
                               imageUrl: feature['imageUrl'],
                               onTap: () {
                                 if (feature['route'] != null) {
-                                  Navigator.pushNamed(context, feature['route']);
+                                  Navigator.pushNamed(
+                                      context, feature['route']);
                                 }
                               },
                               hideButton: feature['hideButton'] ?? false,
