@@ -552,10 +552,15 @@ class _AuthScreenState extends State<AuthScreen> {
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: const Center(
+                                      child: SizedBox(
+                                        width: 21, // adjust as needed
+                                        height: 21,
                                         child: CircularProgressIndicator(
+                                          strokeWidth: 3, // optional: makes the indicator thinner
                                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                         ),
                                       ),
+                                    ),
                                     )
                                   : Container(
                                       width: double.infinity,

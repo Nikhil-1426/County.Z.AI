@@ -181,6 +181,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     // Action buttons
                     Row(
+
                       children: [
                         Container(
                           decoration: BoxDecoration(
@@ -193,26 +194,40 @@ class _HomePageState extends State<HomePage> {
                               Navigator.pushNamed(context, '/profile');
                             },
                           ),
+
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.logout, color: Colors.white),
-                            onPressed: () async {
-                              await FirebaseAuth.instance.signOut();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => const AuthScreen()),
-                              );
-                            },
-                          ),
+                        child: IconButton(
+                          iconSize: 21, // smaller icon
+                          padding: EdgeInsets.zero, // remove default padding
+                          icon: const Icon(Icons.info_outline, color: Colors.white),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/info');
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          iconSize: 21,
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  )
                   ],
                 ),
               ),
@@ -232,6 +247,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
+
                   child: TextField(
                     decoration: InputDecoration(
                       prefixIcon: Icon(
@@ -290,6 +306,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 16), // Bottom padding
                     ],
+
                   ),
                 ),
               ),
