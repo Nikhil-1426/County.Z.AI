@@ -1,27 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-// Importing all required screens
+// Import all actual screens
 import 'loading_screen.dart';
 import 'auth.dart';
 import 'home_page.dart';
 import 'count.dart';
-import 'history.dart';
+import 'history.dart'; // Your actual HistoryPage
 import 'info.dart';
-class HistoryPage extends StatelessWidget {
-  final String userId;
+import 'profile_page.dart';
 
-  const HistoryPage({Key? key, required this.userId}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // Use userId here or ignore it if not needed
-    return Scaffold(
-      appBar: AppBar(title: const Text('History')),
-      body: Center(child: Text('User ID: $userId')),
-    );
-  }
-}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -42,14 +30,15 @@ class MyApp extends StatelessWidget {
       ),
       // Starting screen of the app
       home: const LoadingScreen(),
-      
-      // Defining named routes
+
+      // Named routes (no userId needed)
       routes: {
         '/auth': (context) => const AuthScreen(),
         '/home_page': (context) => const HomePage(),
         '/count': (context) => const CountPage(),
-        '/history': (context) => const HistoryPage(userId: '',),
+        '/history': (context) => const HistoryPage(), // <-- correct one
         '/info': (context) => const InfoPage(),
+        '/profile': (context) => const ProfilePage(),
       },
     );
   }

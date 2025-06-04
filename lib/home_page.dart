@@ -149,7 +149,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 20),
               // Header with user info and actions
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -187,10 +187,10 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
-                          child: IconButton(
-                            icon: const Icon(Icons.info_outline, color: Colors.white),
+                          child:IconButton(
+                            icon: const Icon(Icons.settings, color: Colors.white),
                             onPressed: () {
-                              Navigator.pushNamed(context, '/info');
+                              Navigator.pushNamed(context, '/profile');
                             },
                           ),
                         ),
@@ -217,84 +217,79 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Main content area
-              Flexible(
+              // Search Bar - Now full width with padding
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, -5),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Search Bar
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade200),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: Colors.grey.shade500,
-                              ),
-                              hintText: "Search features",
-                              hintStyle: TextStyle(color: Colors.grey.shade500),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                searchText = value;
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Feature Cards
-                        for (var feature in filteredFeatures)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: _buildFeatureCard(
-                              title: feature['title'],
-                              subtitle: feature['subtitle'],
-                              imageUrl: feature['imageUrl'],
-                              onTap: () {
-                                if (feature['route'] != null) {
-                                  Navigator.pushNamed(context, feature['route']);
-                                }
-                              },
-                              hideButton: feature['hideButton'] ?? false,
-                              buttonText: feature['buttonText'] ?? "Explore",
-                              imageHeight: feature['imageHeight'],
-                              imageWidth: feature['imageWidth'],
-                            ),
-                          ),
-                        // User Stats Card
-                        _buildStatsCard(
-                          minutesLogged: minutesLogged,
-                          countUsed: countUsed,
-                          totalSessions: totalSessions,
-                        ),
-                      ],
+                  child: TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.grey.shade500,
+                      ),
+                      hintText: "Search features",
+                      hintStyle: TextStyle(color: Colors.grey.shade500),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
+                    onChanged: (value) {
+                      setState(() {
+                        searchText = value;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Main content area - Now takes remaining space
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Feature Cards - Now full width with padding
+                      for (var feature in filteredFeatures)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _buildFeatureCard(
+                            title: feature['title'],
+                            subtitle: feature['subtitle'],
+                            imageUrl: feature['imageUrl'],
+                            onTap: () {
+                              if (feature['route'] != null) {
+                                Navigator.pushNamed(context, feature['route']);
+                              }
+                            },
+                            hideButton: feature['hideButton'] ?? false,
+                            buttonText: feature['buttonText'] ?? "Explore",
+                            imageHeight: feature['imageHeight'],
+                            imageWidth: feature['imageWidth'],
+                          ),
+                        ),
+                      // User Stats Card - Now full width with padding
+                      _buildStatsCard(
+                        minutesLogged: minutesLogged,
+                        countUsed: countUsed,
+                        totalSessions: totalSessions,
+                      ),
+                      const SizedBox(height: 16), // Bottom padding
+                    ],
                   ),
                 ),
               ),
@@ -316,6 +311,7 @@ class _HomePageState extends State<HomePage> {
     double? imageWidth,
   }) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -430,6 +426,7 @@ class _HomePageState extends State<HomePage> {
     required int totalSessions,
   }) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [

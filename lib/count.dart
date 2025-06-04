@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CountPage extends StatefulWidget {
   const CountPage({Key? key}) : super(key: key);
@@ -18,6 +21,12 @@ class _CountPageState extends State<CountPage> {
   XFile? _image;
   int? _objectCount;
   bool _isLoading = false;
+  bool _isSaving = false;
+
+  // Firebase instances
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -43,7 +52,7 @@ class _CountPageState extends State<CountPage> {
 
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.1.103:5000/predict'),
+      Uri.parse('http://192.168.1.100:5000/predict'),
     );
 
     request.files.add(await http.MultipartFile.fromPath(
@@ -76,14 +85,91 @@ class _CountPageState extends State<CountPage> {
 
         imageCache.clear();
         imageCache.clearLiveImages();
+
+        // Automatically save to Firebase after processing
+        await _saveToFirebase(file, count);
       } else {
         print('Error: ${response.statusCode}');
         setState(() => _isLoading = false);
+        _showErrorSnackBar('Failed to process image. Please try again.');
       }
     } catch (e) {
       print('Exception: $e');
       setState(() => _isLoading = false);
+      _showErrorSnackBar('Network error. Please check your connection.');
     }
+  }
+
+  Future<void> _saveToFirebase(File processedImage, int count) async {
+    try {
+      setState(() => _isSaving = true);
+
+      // Get current user
+      User? currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        _showErrorSnackBar('Please sign in to save results.');
+        setState(() => _isSaving = false);
+        return;
+      }
+
+      String uid = currentUser.uid;
+      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String fileName = 'processed_images/$uid/${timestamp}_processed.png';
+
+      // Upload image to Firebase Storage
+      UploadTask uploadTask = _storage.ref().child(fileName).putFile(processedImage);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Save metadata to Firestore
+      await _firestore.collection('pipe_counts').add({
+        'uid': uid,
+        'pipe_count': count,
+        'image_url': downloadUrl,
+        'image_path': fileName,
+        'timestamp': FieldValue.serverTimestamp(),
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      setState(() => _isSaving = false);
+      _showSuccessSnackBar('Results saved successfully!');
+    } catch (e) {
+      print('Firebase save error: $e');
+      setState(() => _isSaving = false);
+      _showErrorSnackBar('Failed to save results. Please try again.');
+    }
+  }
+
+  Future<void> _saveCurrentResult() async {
+    if (_image == null || _objectCount == null) {
+      _showErrorSnackBar('No results to save.');
+      return;
+    }
+
+    File imageFile = File(_image!.path);
+    await _saveToFirebase(imageFile, _objectCount!);
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   @override
@@ -230,23 +316,23 @@ class _CountPageState extends State<CountPage> {
                                         ],
                                       ),
                               ),
-                              if (_isLoading)
+                              if (_isLoading || _isSaving)
                                 Container(
                                   decoration: BoxDecoration(
                                     color: Colors.black.withOpacity(0.4),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  child: const Center(
+                                  child: Center(
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        CircularProgressIndicator(
+                                        const CircularProgressIndicator(
                                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                         ),
-                                        SizedBox(height: 16),
+                                        const SizedBox(height: 16),
                                         Text(
-                                          "Processing...",
-                                          style: TextStyle(
+                                          _isLoading ? "Processing..." : "Saving...",
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
@@ -270,7 +356,7 @@ class _CountPageState extends State<CountPage> {
                               icon: Icons.image_outlined,
                               text: "Gallery",
                               onTap: () => _pickImage(ImageSource.gallery),
-                              isEnabled: !_isLoading,
+                              isEnabled: !_isLoading && !_isSaving,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -279,7 +365,7 @@ class _CountPageState extends State<CountPage> {
                               icon: Icons.camera_alt_outlined,
                               text: "Camera",
                               onTap: () => _pickImage(ImageSource.camera),
-                              isEnabled: !_isLoading,
+                              isEnabled: !_isLoading && !_isSaving,
                             ),
                           ),
                         ],
@@ -291,8 +377,8 @@ class _CountPageState extends State<CountPage> {
                             child: _buildActionButton(
                               icon: Icons.send_outlined,
                               text: "Analyze",
-                              onTap: (_image != null && !_isLoading) ? _sendImageToBackend : null,
-                              isEnabled: _image != null && !_isLoading,
+                              onTap: (_image != null && !_isLoading && !_isSaving) ? _sendImageToBackend : null,
+                              isEnabled: _image != null && !_isLoading && !_isSaving,
                               isPrimary: true,
                             ),
                           ),
@@ -301,13 +387,30 @@ class _CountPageState extends State<CountPage> {
                             child: _buildActionButton(
                               icon: Icons.refresh_outlined,
                               text: "Reset",
-                              onTap: (_image != null && !_isLoading) ? _resetCount : null,
-                              isEnabled: _image != null && !_isLoading,
+                              onTap: (_image != null && !_isLoading && !_isSaving) ? _resetCount : null,
+                              isEnabled: _image != null && !_isLoading && !_isSaving,
                               isDestructive: true,
                             ),
                           ),
                         ],
                       ),
+                      // Add Save button row
+                      if (_objectCount != null) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildActionButton(
+                                icon: Icons.save_outlined,
+                                text: "Save Result",
+                                onTap: (!_isLoading && !_isSaving) ? _saveCurrentResult : null,
+                                isEnabled: !_isLoading && !_isSaving,
+                                isSecondary: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 20),
 
                       // Result Display
@@ -382,33 +485,39 @@ class _CountPageState extends State<CountPage> {
     required bool isEnabled,
     bool isPrimary = false,
     bool isDestructive = false,
+    bool isSecondary = false,
   }) {
     Color getButtonColor() {
       if (!isEnabled) return Colors.grey.shade300;
       if (isPrimary) return const Color(0xFF9D78F9);
       if (isDestructive) return Colors.red.shade400;
+      if (isSecondary) return Colors.green.shade400;
       return Colors.grey.shade100;
     }
 
     Color getTextColor() {
       if (!isEnabled) return Colors.grey.shade500;
-      if (isPrimary || isDestructive) return Colors.white;
+      if (isPrimary || isDestructive || isSecondary) return Colors.white;
       return Colors.grey.shade700;
     }
 
     return Container(
-      height: 45,
+      height: 42,
       decoration: BoxDecoration(
-        color: isPrimary && isEnabled
+        color: (isPrimary || isSecondary) && isEnabled
             ? null
             : getButtonColor(),
         gradient: isPrimary && isEnabled
             ? const LinearGradient(
                 colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
               )
-            : null,
+            : isSecondary && isEnabled
+                ? LinearGradient(
+                    colors: [Colors.green.shade400, Colors.green.shade600],
+                  )
+                : null,
         borderRadius: BorderRadius.circular(16),
-        border: !isPrimary && !isDestructive
+        border: !isPrimary && !isDestructive && !isSecondary
             ? Border.all(color: Colors.grey.shade300)
             : null,
         boxShadow: isPrimary && isEnabled
@@ -427,7 +536,15 @@ class _CountPageState extends State<CountPage> {
                       offset: const Offset(0, 4),
                     ),
                   ]
-                : null,
+                : isSecondary && isEnabled
+                    ? [
+                        BoxShadow(
+                          color: Colors.green.shade400.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
       ),
       child: Material(
         color: Colors.transparent,

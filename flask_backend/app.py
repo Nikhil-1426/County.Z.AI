@@ -3,17 +3,16 @@ import numpy as np
 import io
 import os
 import requests
+import torch
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
 from flask_cors import CORS
-from datetime import datetime
-from google.cloud import firestore
-import base64
+from torchvision.ops import nms
 
 app = Flask(__name__)
 CORS(app)
 
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1a5A3Db34TmV2CyH9g9FfvxH_upkaDqoa"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=12QhVOMkVyR_JweTmf-KydK1s15ZqQn6p"
 MODEL_PATH = "best.pt"
 
 def download_model():
@@ -48,10 +47,11 @@ def split_image_into_tiles(image, rows=2, cols=2):
             tiles.append((tile, (x1, y1)))
     return tiles
 
-# Initialize Firestore client using Application Default Credentials
-# Make sure environment variable GOOGLE_APPLICATION_CREDENTIALS is set OR
-# you have logged in via `gcloud auth application-default login`
-db = firestore.Client()
+def apply_global_nms(boxes, scores, iou_threshold=0.5):
+    boxes_tensor = torch.tensor(boxes, dtype=torch.float32)
+    scores_tensor = torch.tensor(scores, dtype=torch.float32)
+    keep_indices = nms(boxes_tensor, scores_tensor, iou_threshold)
+    return keep_indices.cpu().numpy().tolist()
 
 @app.route('/')
 def home():
@@ -63,87 +63,56 @@ def predict():
         return jsonify({"error": "No file provided"}), 400
     
     file = request.files['file']
-    user_id = request.form.get('userId', None)
-    if user_id is None:
-        return jsonify({"error": "userId is required in form data"}), 400
-
     image = read_image(file)
     tiles = split_image_into_tiles(image, rows=2, cols=2)
     
-    total_boxes = []
-
+    boxes_all = []
+    scores_all = []
+    classes_all = []
+    
     for tile_img, (offset_x, offset_y) in tiles:
         results = model.predict(tile_img, conf=0.5, iou=0.3)
         for result in results:
             for box in result.boxes:
                 xyxy = box.xyxy.cpu().numpy()[0]
-                conf = box.conf.cpu().numpy()[0]
+                conf = float(box.conf.cpu().numpy()[0])
                 cls = int(box.cls.cpu().numpy()[0])
-
-                x1 = int(xyxy[0] + offset_x)
-                y1 = int(xyxy[1] + offset_y)
-                x2 = int(xyxy[2] + offset_x)
-                y2 = int(xyxy[3] + offset_y)
-
-                total_boxes.append({
-                    "box": (x1, y1, x2, y2),
-                    "conf": conf,
-                    "cls": cls
-                })
-
-    pipe_count = len(total_boxes)
-
-    # Draw boxes on image
-    for item in total_boxes:
-        x1, y1, x2, y2 = item["box"]
-        cls = item["cls"]
-        conf = item["conf"]
+                
+                # Adjust box to full image coords
+                x1 = float(xyxy[0] + offset_x)
+                y1 = float(xyxy[1] + offset_y)
+                x2 = float(xyxy[2] + offset_x)
+                y2 = float(xyxy[3] + offset_y)
+                
+                boxes_all.append([x1, y1, x2, y2])
+                scores_all.append(conf)
+                classes_all.append(cls)
+    
+    if boxes_all:
+        keep_indices = apply_global_nms(boxes_all, scores_all, iou_threshold=0.5)
+    else:
+        keep_indices = []
+    
+    filtered_boxes = [boxes_all[i] for i in keep_indices]
+    filtered_scores = [scores_all[i] for i in keep_indices]
+    filtered_classes = [classes_all[i] for i in keep_indices]
+    
+    pipe_count = len(filtered_boxes)
+    
+    # Draw filtered boxes
+    for box, conf, cls in zip(filtered_boxes, filtered_scores, filtered_classes):
+        x1, y1, x2, y2 = map(int, box)
         cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(image, f"Pipe {cls} {conf:.2f}", (x1, y1 - 10), 
+        cv2.putText(image, f"Pipe {cls} {conf:.2f}", (x1, y1 - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
+    
     _, img_encoded = cv2.imencode('.png', image)
-    img_bytes = img_encoded.tobytes()
-
-    # Convert image bytes to hex string for easier JSON serialization
-    img_hex = img_bytes.hex()
-
-    # Save detection result to Firestore
-    doc_ref = db.collection('pipe_detections').document()
-    doc_ref.set({
-        "userId": user_id,
-        "pipe_count": pipe_count,
-        "image": img_hex,
-        "timestamp": datetime.utcnow()
-    })
+    img_bytes = io.BytesIO(img_encoded.tobytes())
 
     return jsonify({
         "pipe_count": pipe_count,
-        "image": img_hex
+        "image": img_bytes.getvalue().hex()
     })
-
-@app.route('/history', methods=['GET'])
-def history():
-    user_id = request.args.get('userId', None)
-    if user_id is None:
-        return jsonify({"error": "userId query param is required"}), 400
-
-    docs = db.collection('pipe_detections')\
-             .where('userId', '==', user_id)\
-             .order_by('timestamp', direction=firestore.Query.DESCENDING)\
-             .stream()
-
-    results = []
-    for doc in docs:
-        data = doc.to_dict()
-        results.append({
-            "pipe_count": data.get("pipe_count"),
-            "image": data.get("image"),
-            "timestamp": data.get("timestamp").isoformat() if data.get("timestamp") else None
-        })
-
-    return jsonify(results)
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
