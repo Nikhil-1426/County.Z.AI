@@ -43,6 +43,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
@@ -89,9 +90,10 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  void _toggleFormType() {
+   void _toggleFormType() {
     setState(() {
       _isSignUp = !_isSignUp;
+      _usernameController.clear(); // Clear the username field
     });
   }
 
@@ -126,7 +128,9 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
 
-      await _createUserDocument(userCredential.user);
+      await _createUserDocument(userCredential.user,
+    username: _isSignUp ? _usernameController.text.trim() : null);
+
       await _handleRememberMeStorage(loginType: 'email');
       _navigateToHomePage();
     } on FirebaseAuthException catch (e) {
@@ -167,28 +171,30 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _createUserDocument(User? user) async {
-    if (user == null) return;
-    final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-    final doc = await userRef.get();
+  Future<void> _createUserDocument(User? user, {String? username}) async {
+  if (user == null) return;
+  final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+  final doc = await userRef.get();
 
-    if (!doc.exists) {
-      await userRef.set({
-        'email': user.email,
-        'uid': user.uid,
-        'createdAt': Timestamp.now(),
-        'counts_used': 0,
-        'minutes_logged': 0,
-        'last_login': Timestamp.now(),
-        'rememberMe': _rememberMe,
-      });
-    } else {
-      await userRef.update({
-        'last_login': Timestamp.now(),
-        'rememberMe': _rememberMe,
-      });
-    }
+  if (!doc.exists) {
+    await userRef.set({
+      'email': user.email,
+      'uid': user.uid,
+      'username': username ?? '', // Store username if provided
+      'createdAt': Timestamp.now(),
+      'counts_used': 0,
+      'minutes_logged': 0,
+      'last_login': Timestamp.now(),
+      'rememberMe': _rememberMe,
+    });
+  } else {
+    await userRef.update({
+      'last_login': Timestamp.now(),
+      'rememberMe': _rememberMe,
+    });
   }
+}
+
 
   /// Handles storing or clearing credentials in shared_preferences
   Future<void> _handleRememberMeStorage({required String loginType, String? email}) async {
@@ -376,6 +382,39 @@ class _AuthScreenState extends State<AuthScreen> {
                           key: _formKey,
                           child: Column(
                             children: [
+                              // Username field for Sign Up (now positioned above email)
+                              if (_isSignUp) ...[
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.grey.shade200),
+                                  ),
+                                  child: TextFormField(
+                                    controller: _usernameController,
+                                    decoration: InputDecoration(
+                                      prefixIcon: Icon(
+                                        Icons.person_outline,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                      hintText: "Username",
+                                      hintStyle: TextStyle(color: Colors.grey.shade500),
+                                      border: InputBorder.none,
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 14,
+                                      ),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return 'Please enter a username';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
                               // Email field
                               Container(
                                 decoration: BoxDecoration(
@@ -636,6 +675,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     ),
                                     TextButton(
                                       onPressed: _toggleFormType,
+                                      
                                       child: const Text(
                                         "Sign Up",
                                         style: TextStyle(
