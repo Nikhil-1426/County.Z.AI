@@ -452,8 +452,8 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF9D78F9).withOpacity(0.1),
-            const Color(0xFF78BDF9).withOpacity(0.1),
+            const Color.fromARGB(255, 255, 255, 255),
+            const Color.fromARGB(255, 255, 255, 255),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
