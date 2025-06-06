@@ -53,7 +53,7 @@ class _CountPageState extends State<CountPage> {
     var request = http.MultipartRequest(
       'POST',
 
-      Uri.parse('http://192.168.98.72:5000/predict'),
+      Uri.parse('http://192.168.0.106:5000/predict'),
 
     );
 
