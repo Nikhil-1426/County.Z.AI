@@ -46,17 +46,18 @@ class _HistoryPageState extends State<HistoryPage> {
                   padding: const EdgeInsets.all(24.0),
                   child: Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          width: 44,
-                          height: 44,
+                      const SizedBox(width: 20),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(14),
+                            shape: BoxShape.circle,
                           ),
                           child: const Icon(
-                            Icons.arrow_back_ios_new,
+                            Icons.arrow_back,
                             color: Colors.white,
                             size: 20,
                           ),
@@ -150,22 +151,22 @@ class _HistoryPageState extends State<HistoryPage> {
                 padding: const EdgeInsets.all(24.0),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 20,
                       ),
                     ),
+                  ),
                     const Expanded(
                       child: Text(
                         "Detection History",
