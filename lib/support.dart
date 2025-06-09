@@ -8,26 +8,16 @@ class SupportPage extends StatefulWidget {
 }
 
 class _SupportPageState extends State<SupportPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _messageController = TextEditingController();
-  bool _isSubmitting = false;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _messageController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     
-    // More comprehensive responsive breakpoints
+    // Match InfoPage responsive breakpoints
+    final isSmallScreen = screenWidth < 360;
+    final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
+    
+    // More comprehensive responsive breakpoints for other elements
     final isVerySmall = screenWidth < 320; // Very old/small phones
     final isSmall = screenWidth >= 320 && screenWidth < 375; // iPhone SE, etc.
     final isMedium = screenWidth >= 375 && screenWidth < 414; // iPhone 8, etc.
@@ -59,19 +49,19 @@ class _SupportPageState extends State<SupportPage> {
             physics: const BouncingScrollPhysics(),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
+                horizontal: isSmallScreen ? 16.0 : 24.0,
                 vertical: 12.0,
               ),
               child: Column(
                 children: [
-                  // Header Section
+                  // Header Section - Match InfoPage exactly
                   Row(
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
                         child: Container(
-                          width: isVerySmall ? 32 : isSmall ? 36 : 40,
-                          height: isVerySmall ? 32 : isSmall ? 36 : 40,
+                          width: isSmallScreen ? 36 : 40,
+                          height: isSmallScreen ? 36 : 40,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
@@ -79,7 +69,7 @@ class _SupportPageState extends State<SupportPage> {
                           child: Icon(
                             Icons.arrow_back,
                             color: Colors.white,
-                            size: iconSize,
+                            size: isSmallScreen ? 18 : 20,
                           ),
                         ),
                       ),
@@ -88,23 +78,23 @@ class _SupportPageState extends State<SupportPage> {
                           "Support",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: isVerySmall ? 20 : isSmall ? 22 : isMedium ? 24 : 26,
+                            fontSize: isSmallScreen ? 22 : isMediumScreen ? 24 : 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
                       ),
-                      SizedBox(width: isVerySmall ? 32 : isSmall ? 36 : 40),
+                      SizedBox(width: isSmallScreen ? 36 : 40),
                     ],
                   ),
                   
-                  SizedBox(height: isVerySmall ? 16 : isSmall ? 20 : 24),
+                  SizedBox(height: isSmallScreen ? 20 : 24),
                   
-                  // Contact Form Section
+                  // FAQ Section
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Contact Us",
+                      "Frequently Asked Questions",
                       style: TextStyle(
                         fontSize: isVerySmall ? 16 : isSmall ? 18 : 20,
                         fontWeight: FontWeight.w600,
@@ -115,7 +105,7 @@ class _SupportPageState extends State<SupportPage> {
                   
                   SizedBox(height: isVerySmall ? 8 : isSmall ? 10 : 12),
                   
-                  // Contact Form Card
+                  // FAQ Container
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(cardPadding),
@@ -131,156 +121,74 @@ class _SupportPageState extends State<SupportPage> {
                         ),
                       ],
                     ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Send us a message",
-                            style: TextStyle(
-                              fontSize: isVerySmall ? 14 : isSmall ? 16 : 17,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF2D3748),
-                            ),
-                          ),
-                          SizedBox(height: isVerySmall ? 10 : isSmall ? 12 : 16),
-                          
-                          // Name Field
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: InputDecoration(
-                              labelText: "Your Name",
-                              labelStyle: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: isVerySmall ? 12 : isSmall ? 14 : 15,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Color(0xFF9D78F9)),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: isVerySmall ? 10 : isSmall ? 12 : 14,
-                                vertical: isVerySmall ? 10 : isSmall ? 12 : 14,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your name';
-                              }
-                              return null;
-                            },
-                          ),
-                          
-                          SizedBox(height: isVerySmall ? 10 : isSmall ? 12 : 16),
-                          
-                          // Email Field
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              labelText: "Email Address",
-                              labelStyle: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: isVerySmall ? 12 : isSmall ? 14 : 15,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Color(0xFF9D78F9)),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: isVerySmall ? 10 : isSmall ? 12 : 14,
-                                vertical: isVerySmall ? 10 : isSmall ? 12 : 14,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your email';
-                              }
-                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                return 'Please enter a valid email';
-                              }
-                              return null;
-                            },
-                          ),
-                          
-                          SizedBox(height: isVerySmall ? 10 : isSmall ? 12 : 16),
-                          
-                          // Message Field
-                          TextFormField(
-                            controller: _messageController,
-                            maxLines: isVerySmall ? 3 : 4,
-                            decoration: InputDecoration(
-                              labelText: "Your Message",
-                              labelStyle: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: isVerySmall ? 12 : isSmall ? 14 : 15,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Color(0xFF9D78F9)),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: isVerySmall ? 10 : isSmall ? 12 : 14,
-                                vertical: isVerySmall ? 10 : isSmall ? 12 : 14,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your message';
-                              }
-                              return null;
-                            },
-                          ),
-                          
-                          SizedBox(height: isVerySmall ? 14 : isSmall ? 16 : 20),
-                          
-                          // Submit Button
-                          SizedBox(
-                            width: double.infinity,
-                            height: buttonHeight,
-                            child: ElevatedButton(
-                              onPressed: _isSubmitting ? null : _submitForm,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF9D78F9),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: isVerySmall ? 24 : isSmall ? 26 : 28,
+                              height: isVerySmall ? 24 : isSmall ? 26 : 28,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
                                 ),
-                                elevation: 0,
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                              child: _isSubmitting
-                                  ? SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
-                                    )
-                                  : Text(
-                                      "Send Message",
-                                      style: TextStyle(
-                                        fontSize: isVerySmall ? 14 : isSmall ? 15 : 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                              child: Icon(
+                                Icons.help_outline,
+                                color: Colors.white,
+                                size: isVerySmall ? 14 : isSmall ? 16 : 18,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                            SizedBox(width: isVerySmall ? 8 : isSmall ? 10 : 12),
+                            Text(
+                              "Common Questions",
+                              style: TextStyle(
+                                fontSize: isVerySmall ? 14 : isSmall ? 16 : 18,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF2D3748),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: isVerySmall ? 12 : isSmall ? 14 : 16),
+                        
+                        // FAQ Items
+                        _buildFAQItem(
+                          question: "How accurate is the object detection?",
+                          answer: "Our AI models provide 95%+ accuracy for most common objects.",
+                          isVerySmall: isVerySmall,
+                          isSmall: isSmall,
+                        ),
+                        
+                        SizedBox(height: isVerySmall ? 12 : isSmall ? 14 : 16),
+                        
+                        _buildFAQItem(
+                          question: "Can I export my usage data?",
+                          answer: "Yes, you can export your data from the dashboard section.",
+                          isVerySmall: isVerySmall,
+                          isSmall: isSmall,
+                        ),
+                        
+                        SizedBox(height: isVerySmall ? 12 : isSmall ? 14 : 16),
+                        
+                        _buildFAQItem(
+                          question: "Is my data secure?",
+                          answer: "All data is processed locally on your device for privacy.",
+                          isVerySmall: isVerySmall,
+                          isSmall: isSmall,
+                        ),
+                        
+                        SizedBox(height: isVerySmall ? 12 : isSmall ? 14 : 16),
+                        
+                        _buildFAQItem(
+                          question: "How do I report a bug?",
+                          answer: "Email us at info@zigainfotech.com with device details and steps to reproduce.",
+                          isVerySmall: isVerySmall,
+                          isSmall: isSmall,
+                        ),
+                      ],
                     ),
                   ),
                   
@@ -304,23 +212,9 @@ class _SupportPageState extends State<SupportPage> {
                   // Support Options
                   _buildSupportOption(
                     icon: Icons.email_outlined,
-                    title: "Email Support",
-                    description: "zigainfotech@gmail.com",
-                    onTap: () => _showEmailDialog(context),
-                    isVerySmall: isVerySmall,
-                    isSmall: isSmall,
-                    isMedium: isMedium,
-                    cardPadding: cardPadding,
-                    iconSize: iconSize,
-                  ),
-                  
-                  SizedBox(height: isVerySmall ? 8 : isSmall ? 10 : 12),
-                  
-                  _buildSupportOption(
-                    icon: Icons.help_outline,
-                    title: "FAQ",
-                    description: "Find answers to common questions",
-                    onTap: () => _showFAQDialog(context),
+                    title: "Support",
+                    description: "info@zigainfotech.com",
+                    onTap: () => _showSupportDialog(context),
                     isVerySmall: isVerySmall,
                     isSmall: isSmall,
                     isMedium: isMedium,
@@ -423,6 +317,44 @@ class _SupportPageState extends State<SupportPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFAQItem({
+    required String question,
+    required String answer,
+    required bool isVerySmall,
+    required bool isSmall,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(isVerySmall ? 10 : isSmall ? 12 : 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(isVerySmall ? 8 : isSmall ? 10 : 12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            question,
+            style: TextStyle(
+              fontSize: isVerySmall ? 13 : isSmall ? 14 : 15,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF2D3748),
+            ),
+          ),
+          SizedBox(height: isVerySmall ? 4 : isSmall ? 6 : 8),
+          Text(
+            answer,
+            style: TextStyle(
+              fontSize: isVerySmall ? 12 : isSmall ? 13 : 14,
+              color: Colors.grey.shade700,
+              height: 1.3,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -530,75 +462,7 @@ class _SupportPageState extends State<SupportPage> {
     );
   }
 
-  void _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isSubmitting = true;
-      });
-
-      // Simulate form submission
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isSubmitting = false;
-      });
-
-      // Show success dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
-                  ),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text("Message Sent"),
-            ],
-          ),
-          content: const Text("Thank you for your message! We'll get back to you within 24 hours."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _clearForm();
-              },
-              child: const Text(
-                "OK",
-                style: TextStyle(
-                  color: Color(0xFF9D78F9),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  void _clearForm() {
-    _nameController.clear();
-    _emailController.clear();
-    _messageController.clear();
-  }
-
-  void _showEmailDialog(BuildContext context) {
+  void _showSupportDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -623,77 +487,10 @@ class _SupportPageState extends State<SupportPage> {
               ),
             ),
             const SizedBox(width: 12),
-            const Text("Email Support"),
+            const Text("Support"),
           ],
         ),
-        content: const Text("You can reach us directly at:\n\nzigainfotech@gmail.com\n\nWe typically respond within 24 hours."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "Close",
-              style: TextStyle(
-                color: Color(0xFF9D78F9),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showFAQDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        title: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
-                ),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Icon(
-                Icons.help_outline,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text("Frequently Asked Questions"),
-          ],
-        ),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Q: How accurate is the object detection?",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              Text("A: Our AI models provide 95%+ accuracy for most common objects.\n"),
-              Text(
-                "Q: Can I export my usage data?",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              Text("A: Yes, you can export your data from the dashboard.\n"),
-              Text(
-                "Q: Is my data secure?",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              Text("A: All data is processed locally on your device for privacy."),
-            ],
-          ),
-        ),
+        content: const Text("You can reach us directly at:\n\ninfo@zigainfotech.com\n\nWe typically respond within 24 hours."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -738,7 +535,7 @@ class _SupportPageState extends State<SupportPage> {
             const Text("Report a Bug"),
           ],
         ),
-        content: const Text("Found a bug? Please email us at zigainfotech@gmail.com with:\n\n• Device model and OS version\n• Steps to reproduce the issue\n• Screenshots if possible\n\nThis helps us fix issues faster!"),
+        content: const Text("Found a bug? Please email us at info@zigainfotech.com with:\n\n• Device model and OS version\n• Steps to reproduce the issue\n• Screenshots if possible\n\nThis helps us fix issues faster!"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -772,7 +569,7 @@ class _SupportPageState extends State<SupportPage> {
                   colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
                 ),
                 borderRadius: BorderRadius.circular(6),
-              ),
+                ),
               child: const Icon(
                 Icons.star_outline,
                 color: Colors.white,
@@ -783,7 +580,7 @@ class _SupportPageState extends State<SupportPage> {
             const Text("Feature Request"),
           ],
         ),
-        content: const Text("Have an idea for a new feature?\n\nWe'd love to hear from you! Send your suggestions to zigainfotech@gmail.com and help us make the app even better.\n\nDescribe your idea and how it would help you use the app more effectively."),
+        content: const Text("Have an idea for a new feature? We'd love to hear it!\n\nPlease email us at info@zigainfotech.com with:\n\n• Detailed description of the feature\n• How it would benefit users\n• Any mockups or examples\n\nYour feedback helps shape our app!"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

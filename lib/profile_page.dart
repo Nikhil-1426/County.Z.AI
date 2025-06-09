@@ -108,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
     
     final String email = user?.email ?? "Not available";
-    final String username = userData['username'] ?? "User";
+    final String username = userData['username'] ?? "";
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -285,6 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   title: "Privacy Policy",
                   subtitle: "Review our privacy terms",
                   onTap: () {
+                    Navigator.pushNamed(context, '/privacy');
                     // You can add navigation to privacy policy here
                   },
                   isSmallScreen: isSmallScreen,

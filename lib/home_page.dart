@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
     _timer?.cancel();
     super.dispose();
   }
+  
 
   Future<void> _initializeUserDataAndStartTimer() async {
     await _incrementSession();
@@ -170,11 +171,15 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.white,
                             ),
                           ),
-                          SizedBox(height: headerSpacing * 0.38),
+                          SizedBox(height: headerSpacing * 0.15),
                           Text(
-                            email,
+                            (userData['username'] != null && userData['username'].toString().trim().isNotEmpty)
+                                ? userData['username']
+                                : email,
                             style: TextStyle(
-                              fontSize: screenWidth * 0.045,
+                              fontSize: (userData['username'] != null && userData['username'].toString().trim().isNotEmpty)
+                                  ? screenWidth * 0.06
+                                  : screenWidth * 0.045,
                               color: Colors.white.withOpacity(0.9),
                             ),
                             maxLines: 1,

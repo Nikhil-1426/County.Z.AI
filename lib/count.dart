@@ -131,6 +131,11 @@ class _CountPageState extends State<CountPage> {
         'created_at': DateTime.now().toIso8601String(),
       });
 
+      await _firestore.collection('users').doc(uid).set({
+        'counts_used': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+      
+
       setState(() => _isSaving = false);
       _showSuccessSnackBar('Results saved successfully!');
     } catch (e) {
