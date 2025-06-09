@@ -52,9 +52,7 @@ class _CountPageState extends State<CountPage> {
 
     var request = http.MultipartRequest(
       'POST',
-
       Uri.parse('http://192.168.0.106:5000/predict'),
-
     );
 
     request.files.add(await http.MultipartFile.fromPath(
@@ -133,6 +131,11 @@ class _CountPageState extends State<CountPage> {
         'created_at': DateTime.now().toIso8601String(),
       });
 
+      await _firestore.collection('users').doc(uid).set({
+        'counts_used': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+      
+
       setState(() => _isSaving = false);
       _showSuccessSnackBar('Results saved successfully!');
     } catch (e) {
@@ -193,11 +196,11 @@ class _CountPageState extends State<CountPage> {
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              // Back arrow
+              const SizedBox(height: 10), // Back button brought down by 2 pixels
+              // Back arrow only
               Row(
                 children: [
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 25),
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
@@ -217,11 +220,11 @@ class _CountPageState extends State<CountPage> {
                   const Spacer(),
                 ],
               ),
-              const SizedBox(height: 10),
-              // Header with icon
+              const SizedBox(height: 0),
+              // Camera icon in the center
               Container(
-                width: 85,
-                height: 85,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
@@ -232,36 +235,37 @@ class _CountPageState extends State<CountPage> {
                   size: 35,
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 8),
+              // Header text - increased sizes
               const Text(
                 "Object Counter",
                 style: TextStyle(
-                  fontSize: 27,
+                  fontSize: 26, // Increased by 2
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 2),
               Text(
                 "AI-powered object detection and counting",
                 style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.white.withOpacity(1),
+                  fontSize: 16, // Increased by 2
+                  color: Colors.white.withOpacity(0.9),
                 ),
               ),
-              const SizedBox(height: 19),
-              // White card container
+              const SizedBox(height: 12),
+              // White card container with positive margin only
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  margin: const EdgeInsets.fromLTRB(25, 0, 25, 30), // Changed from -8 to 0
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha(25),
                         blurRadius: 20,
                         offset: const Offset(0, -5),
                       ),
@@ -269,8 +273,9 @@ class _CountPageState extends State<CountPage> {
                   ),
                   child: Column(
                     children: [
-                      // Image Display Area
+                      // Image Display Area - Balanced size
                       Expanded(
+                        flex: 3, // Back to 3 for better balance
                         child: Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -321,7 +326,7 @@ class _CountPageState extends State<CountPage> {
                               if (_isLoading || _isSaving)
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.4),
+                                    color: Colors.black.withAlpha(102),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Center(
@@ -396,76 +401,77 @@ class _CountPageState extends State<CountPage> {
                           ),
                         ],
                       ),
-                      // Add Save button row
-                      if (_objectCount != null) ...[
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildActionButton(
-                                icon: Icons.save_outlined,
-                                text: "Save Result",
-                                onTap: (!_isLoading && !_isSaving) ? _saveCurrentResult : null,
-                                isEnabled: !_isLoading && !_isSaving,
-                                isSecondary: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16), // Reduced spacing
 
-                      // Result Display
+                      // Improved Result Display - Cleaner and more subtle
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(16), // Reduced padding
                         decoration: BoxDecoration(
-                          gradient: _objectCount != null
-                              ? const LinearGradient(
-                                  colors:  [Color(0xFF9D78F9), Color(0xFF78BDF9)],
-                                )
-                              : null,
-                          color: _objectCount == null ? Colors.grey.shade50 : null,
-                          borderRadius: BorderRadius.circular(16),
+                          color: _objectCount != null ? Colors.grey.shade50 : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12), // Smaller radius
                           border: Border.all(
-                            color: _objectCount != null ? Colors.transparent : Colors.grey.shade200,
+                            color: _objectCount != null ? const Color(0xFF9D78F9).withAlpha(51) : Colors.grey.shade200,
+                            width: _objectCount != null ? 1.5 : 1,
                           ),
-                          boxShadow: _objectCount != null
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(0xFF9D78F9).withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ]
-                              : null,
                         ),
-                        child: Column(
+                        child: Row(
                           children: [
-                            Icon(
-                              _objectCount != null ? Icons.analytics_outlined : Icons.search_outlined,
-                              size: 32,
-                              color: _objectCount != null ? Colors.white : Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              _objectCount != null ? "Pipe Count" : "Pipe Count",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: _objectCount != null ? Colors.white.withOpacity(0.9) : Colors.grey.shade500,
+                            // Icon on the left
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: _objectCount != null 
+                                    ? const Color(0xFF9D78F9).withAlpha(26)
+                                    : Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                _objectCount != null ? Icons.analytics_outlined : Icons.search_outlined,
+                                size: 20,
+                                color: _objectCount != null 
+                                    ? const Color(0xFF9D78F9)
+                                    : Colors.grey.shade400,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _objectCount != null ? "$_objectCount" : "No count yet",
-                              style: TextStyle(
-                                fontSize: _objectCount != null ? 32 : 16,
-                                fontWeight: _objectCount != null ? FontWeight.bold : FontWeight.w500,
-                                color: _objectCount != null ? Colors.white : Colors.grey.shade400,
-                                letterSpacing: _objectCount != null ? 1.2 : 0,
+                            const SizedBox(width: 12),
+                            // Text content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Pipe Count",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: _objectCount != null 
+                                          ? Colors.grey.shade700
+                                          : Colors.grey.shade500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _objectCount != null ? "$_objectCount pipes detected" : "No analysis yet",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                            // Count number on the right
+                            if (_objectCount != null)
+                              Text(
+                                "$_objectCount",
+                                style: const TextStyle(
+                                  fontSize: 20, // Much smaller than before
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF9D78F9),
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -525,7 +531,7 @@ class _CountPageState extends State<CountPage> {
         boxShadow: isPrimary && isEnabled
             ? [
                 BoxShadow(
-                  color: const Color(0xFF9D78F9).withOpacity(0.3),
+                  color: const Color(0xFF9D78F9).withAlpha(77),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -533,7 +539,7 @@ class _CountPageState extends State<CountPage> {
             : isDestructive && isEnabled
                 ? [
                     BoxShadow(
-                      color: Colors.red.shade400.withOpacity(0.3),
+                      color: Colors.red.shade400.withAlpha(77),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -541,7 +547,7 @@ class _CountPageState extends State<CountPage> {
                 : isSecondary && isEnabled
                     ? [
                         BoxShadow(
-                          color: Colors.green.shade400.withOpacity(0.3),
+                          color: Colors.green.shade400.withAlpha(77),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),

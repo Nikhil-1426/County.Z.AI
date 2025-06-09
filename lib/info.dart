@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class InfoPage extends StatelessWidget {
   const InfoPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+    final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -23,9 +29,11 @@ class InfoPage extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.symmetric(
+                horizontal: isSmallScreen ? 16.0 : 24.0,
+                vertical: 12.0,
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header Section
                   Row(
@@ -33,346 +41,412 @@ class InfoPage extends StatelessWidget {
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
                         child: Container(
-                          width: 44,
-                          height: 44,
+                          width: isSmallScreen ? 36 : 40,
+                          height: isSmallScreen ? 36 : 40,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(14),
+                            shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new,
+                          child: Icon(
+                            Icons.arrow_back,
                             color: Colors.white,
-                            size: 20,
+                            size: isSmallScreen ? 18 : 20,
                           ),
                         ),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          "About & Information",
+                          "Information",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: isSmallScreen ? 22 : isMediumScreen ? 24 : 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 44),
+                      SizedBox(width: isSmallScreen ? 36 : 40),
                     ],
                   ),
                   
-                  const SizedBox(height: 40),
-                  
-                  // App Icon Section
-                  Center(
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(25),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 3,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.visibility_outlined,
-                        color: Colors.white,
-                        size: 45,
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  const Center(
-                    child: Text(
-                      "Object Detection App",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  Center(
-                    child: Text(
-                      "Version 1.0.0",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 40),
+                  SizedBox(height: isSmallScreen ? 20 : 24),
                   
                   // About Section
-                  Text(
-                    "About the App",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white.withOpacity(0.95),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "About Ziga Infotech",
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 18 : 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
                     ),
                   ),
                   
-                  const SizedBox(height: 16),
+                  SizedBox(height: isSmallScreen ? 10 : 12),
                   
-                  Text(
-                    "This app helps users perform object detection and track activity statistics like sessions, usage time, and more. Powered by advanced AI technology to provide accurate real-time detection.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.85),
-                      height: 1.5,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 40),
-                  
-                  // Features Section
-                  Text(
-                    "Key Features",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white.withOpacity(0.95),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  _buildFeatureItem(
-                    icon: Icons.analytics_outlined,
-                    title: "Smart Object Counting",
-                    description: "Advanced AI models for accurate detection and counting",
-                  ),
-                  
-                  _buildFeatureItem(
-                    icon: Icons.insert_chart_outlined,
-                    title: "Usage Analytics",
-                    description: "Comprehensive daily statistics to monitor your activity",
-                  ),
-                  
-                  _buildFeatureItem(
-                    icon: Icons.history_outlined,
-                    title: "Session History",
-                    description: "Detailed logging and history of all your sessions",
-                  ),
-                  
-                  _buildFeatureItem(
-                    icon: Icons.dashboard_outlined,
-                    title: "Personal Dashboard",
-                    description: "Customizable dashboard with metrics that matter to you",
-                  ),
-                  
-                  const SizedBox(height: 40),
-                  
-                  // Contact Section
-                  Text(
-                    "Support & Contact",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white.withOpacity(0.95),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Contact Support Button
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                            contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                            title: Row(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.support_outlined,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                const Text(
-                                  "Contact Support",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF2D3748),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            content: const Text(
-                              "For any queries or support, please reach out to us at:\n\nzigainfotech@gmail.com\n\nWe'll get back to you as soon as possible!",
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Color(0xFF4A5568),
-                                height: 1.4,
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: TextButton.styleFrom(
-                                  backgroundColor: const Color(0xFF9D78F9).withOpacity(0.1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                ),
-                                child: const Text(
-                                  "Close",
-                                  style: TextStyle(
-                                    color: Color(0xFF9D78F9),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
+                  // About Description Card
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(isSmallScreen ? 16 : 20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: isSmallScreen ? 12 : 16,
+                          offset: const Offset(0, 4),
                         ),
-                        child: Row(
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
                             Container(
-                              width: 50,
-                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
                                 ),
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF9D78F9).withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Icon(
-                                Icons.support_agent,
-                                color: Colors.white,
-                                size: 24,
+                              child: Text(
+                                "Est. 2020",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: isSmallScreen ? 11 : 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 20),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Get Support",
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF2D3748),
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    "Contact us for help and support",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFF718096),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            const Spacer(),
                             Container(
-                              width: 32,
-                              height: 32,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF9D78F9).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                color: Color(0xFF9D78F9),
-                                size: 16,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star_rounded,
+                                    size: 14,
+                                    color: const Color(0xFF9D78F9),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "4.9",
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 11 : 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF9D78F9),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
+                        
+                        SizedBox(height: isSmallScreen ? 16 : 20),
+                        
+                        Text(
+                          "Ziga Infotech, a reputable software development company in Chennai, can handle all your software development demands with peace of mind. Give us your whole or partial development projects, and you'll have on-time delivery, faultless product quality, and teams that are flexible.",
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 14 : 15,
+                            color: const Color(0xFF2D3748),
+                            height: 1.5,
+                          ),
+                        ),
+                        
+                        SizedBox(height: isSmallScreen ? 16 : 20),
+                        
+                        // Quick stats row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatItem("30+", "Projects", isSmallScreen),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 30,
+                              color: Colors.grey.shade300,
+                            ),
+                            Expanded(
+                              child: _buildStatItem("5+", "Years", isSmallScreen),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 30,
+                              color: Colors.grey.shade300,
+                            ),
+                            Expanded(
+                              child: _buildStatItem("20+", "Clients", isSmallScreen),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+                  
+                  // Features Section
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Features",
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 18 : 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                   ),
                   
-                  const SizedBox(height: 40),
+                  SizedBox(height: isSmallScreen ? 10 : 12),
                   
-                  // Footer
-                  Center(
+                  // Features Container
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(isSmallScreen ? 14 : 16),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: isSmallScreen ? 8 : 12,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        _buildFeatureItem(
+                          icon: Icons.analytics_outlined,
+                          title: "Object Counting",
+                          description: "Advanced AI models for accurate detection",
+                          isSmallScreen: isSmallScreen,
+                        ),
+                        
+                        SizedBox(height: isSmallScreen ? 16 : 20),
+                        
+                        _buildFeatureItem(
+                          icon: Icons.insert_chart_outlined,
+                          title: "Usage Tracking",
+                          description: "Daily statistics to monitor your activity",
+                          isSmallScreen: isSmallScreen,
+                        ),
+                        
+                        SizedBox(height: isSmallScreen ? 16 : 20),
+                        
+                        _buildFeatureItem(
+                          icon: Icons.history_outlined,
+                          title: "History Logging",
+                          description: "Detailed history of all sessions",
+                          isSmallScreen: isSmallScreen,
+                        ),
+                        
+                        SizedBox(height: isSmallScreen ? 16 : 20),
+                        
+                        _buildFeatureItem(
+                          icon: Icons.dashboard_outlined,
+                          title: "Personalized Dashboard",
+                          description: "Display the metrics that matter to you",
+                          isSmallScreen: isSmallScreen,
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+                  
+                  // Company Information Section
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Ziga Infotech",
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 18 : 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ),
+                  
+                  SizedBox(height: isSmallScreen ? 10 : 12),
+                  
+                  // Company Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(isSmallScreen ? 14 : 16),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: isSmallScreen ? 8 : 12,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: isSmallScreen ? 16 : 18,
+                              color: const Color(0xFF9D78F9),
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "Address:",
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 14 : 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF2D3748),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Padding(
+                          padding: EdgeInsets.only(left: isSmallScreen ? 24 : 26),
+                          child: Text(
+                            "2nd Floor, Sai RK Complex, Plot No: 9, 1st Main Rd, Raghava Nagar, Madipakkam, Chennai, St.Thomas Mount-cum-Pallavaram, Tamil Nadu 600091",
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 13 : 14,
+                              color: const Color(0xFF2D3748),
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                        
+                        SizedBox(height: isSmallScreen ? 12 : 16),
+                        
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.phone_outlined,
+                              size: isSmallScreen ? 16 : 18,
+                              color: const Color(0xFF9D78F9),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              "Phone: 098409 22623",
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 14 : 15,
+                                color: const Color(0xFF2D3748),
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        SizedBox(height: isSmallScreen ? 12 : 16),
+                        
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.language_outlined,
+                              size: isSmallScreen ? 16 : 18,
+                              color: const Color(0xFF9D78F9),
+                            ),
+                            SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => _launchURL("https://zigainfotech.com"),
+                              child: Text(
+                                "Website : zigainfotech.com",
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 14 : 15,
+                                  color: const Color(0xFF9D78F9),
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        SizedBox(height: isSmallScreen ? 12 : 16),
+                        
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.business_outlined,
+                              size: isSmallScreen ? 16 : 18,
+                              color: const Color(0xFF9D78F9),
+                            ),
+                            SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => _launchURL("https://www.linkedin.com/company/ziga-infotech-pvt-ltd/"),
+                              child: Text(
+                                "LinkedIn : Ziga Infotech",
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 14 : 15,
+                                  color: const Color(0xFF9D78F9),
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: isSmallScreen ? 20 : 24),
+                  
+                  // Footer Section
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(isSmallScreen ? 14 : 16),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: isSmallScreen ? 8 : 12,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       children: [
                         Text(
-                          "Developed by",
+                          "Developed by Ziga Infotech",
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 14,
+                            color: const Color(0xFF2D3748),
+                            fontSize: isSmallScreen ? 14 : 15,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: isSmallScreen ? 4 : 6),
                         Text(
-                          "Ziga Infotech",
+                          "Version 1.0.0",
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
+                            fontSize: isSmallScreen ? 12 : 13,
                           ),
                         ),
                       ],
                     ),
                   ),
                   
-                  const SizedBox(height: 24),
+                  SizedBox(height: isSmallScreen ? 16 : 20),
                 ],
               ),
             ),
@@ -382,60 +456,87 @@ class InfoPage extends StatelessWidget {
     );
   }
   
+
+  Widget _buildStatItem(String number, String label, bool isSmallScreen) {
+  return Column(
+    children: [
+      Text(
+        number,
+        style: TextStyle(
+          fontSize: isSmallScreen ? 18 : 20,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF9D78F9),
+        ),
+      ),
+      const SizedBox(height: 2),
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: isSmallScreen ? 11 : 12,
+          color: Colors.grey.shade600,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
+}
+
+  // Feature item widget (for use inside container)
   Widget _buildFeatureItem({
     required IconData icon,
     required String title,
     required String description,
+    required bool isSmallScreen,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: isSmallScreen ? 20 : 22,
+          color: const Color(0xFF9D78F9),
+        ),
+        SizedBox(width: isSmallScreen ? 12 : 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: isSmallScreen ? 15 : 16,
+                  color: const Color(0xFF2D3748),
+                ),
               ),
-            ),
-            child: Icon(
-              icon,
-              size: 24,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 17,
-                    color: Colors.white.withOpacity(0.95),
-                  ),
+              SizedBox(height: isSmallScreen ? 2 : 4),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 13 : 14,
+                  color: Colors.grey.shade600,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white.withOpacity(0.8),
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
+  }
+  
+  // URL launcher helper method
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        // Handle case where URL can't be launched
+        print('Could not launch $url');
+      }
+    } catch (e) {
+      // Handle any exceptions
+      print('Error launching URL: $e');
+    }
   }
 }

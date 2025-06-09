@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
     _timer?.cancel();
     super.dispose();
   }
+  
 
   Future<void> _initializeUserDataAndStartTimer() async {
     await _incrementSession();
@@ -88,6 +89,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final safePadding = MediaQuery.of(context).padding;
+    
+    // Responsive values based on screen size
+    final horizontalPadding = screenWidth * 0.04; // 4% of screen width
+    final headerSpacing = screenHeight * 0.035; // 2% of screen height
+    final cardSpacing = screenHeight * 0.030; // 2.5% of screen height
+    final iconSize = screenWidth * 0.055; // 5.5% of screen width
+    final buttonHeight = screenHeight * 0.065; // 5.5% of screen height
+    
     final String email = user?.email ?? "User";
 
     final List<Map<String, dynamic>> allFeatures = [
@@ -98,32 +110,25 @@ class _HomePageState extends State<HomePage> {
             'https://cdn4.iconfinder.com/data/icons/object-detection-technology/24/material_scan_reader_recognition_3D_object_detection-512.png',
         'route': '/count',
         'hideButton': false,
-        'imageHeight': 60.0,
-        'imageWidth': 60.0,
+        'imageHeight': screenWidth * 0.15,
+        'imageWidth': screenWidth * 0.15,
       },
       {
         'title': 'Recent Activity',
-        'subtitle': '', // Set later
+        'subtitle': 'Track your Journey', // Set later
         'imageUrl':
             'https://cdn2.iconfinder.com/data/icons/thin-outline-essential-ui/25/39-512.png',
         'route': '/history',
         'hideButton': false,
         'buttonText': 'View History',
-        'imageHeight': 60.0,
-        'imageWidth': 60.0,
+        'imageHeight': screenWidth * 0.15,
+        'imageWidth': screenWidth * 0.15,
       },
     ];
 
     final countUsed = userData['counts_used'] ?? 0;
     final minutesLogged = userData['minutes_logged'] ?? 0;
     final totalSessions = userData['total_sessions'] ?? 0;
-
-    final lastCountTimestamp = userData['last_count_time'];
-    final lastCount = lastCountTimestamp != null
-        ? (lastCountTimestamp as Timestamp).toDate().toString()
-        : "N/A";
-
-    allFeatures[1]['subtitle'] = "Last count: $lastCount";
 
     final filteredFeatures = allFeatures.where((feature) {
       return feature['title'].toLowerCase().contains(searchText.toLowerCase());
@@ -146,31 +151,35 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: headerSpacing),
               // Header with user info and actions
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // User info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "Welcome Back!",
                             style: TextStyle(
-                              fontSize: 27,
+                              fontSize: screenWidth * 0.08,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: headerSpacing * 0.15),
                           Text(
-                            email,
+                            (userData['username'] != null && userData['username'].toString().trim().isNotEmpty)
+                                ? userData['username']
+                                : email,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: (userData['username'] != null && userData['username'].toString().trim().isNotEmpty)
+                                  ? screenWidth * 0.06
+                                  : screenWidth * 0.045,
                               color: Colors.white.withOpacity(0.9),
                             ),
                             maxLines: 1,
@@ -179,140 +188,113 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    // Action buttons
-                    Row(
+                    // Action buttons - positioned higher and smaller
+                    Column(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon:
-                                const Icon(Icons.settings, color: Colors.white),
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/profile');
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            iconSize: 21, // smaller icon
-                            padding: EdgeInsets.zero, // remove default padding
-                            icon: const Icon(Icons.info_outline,
-                                color: Colors.white),
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/info');
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            iconSize: 21,
-                            padding: EdgeInsets.zero,
-                            icon: const Icon(Icons.logout, color: Colors.white),
-                            onPressed: () async {
-                              await FirebaseAuth.instance.signOut();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const AuthScreen()),
-                              );
-                            },
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              width: screenWidth * 0.11,
+                              height: screenWidth * 0.11,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                iconSize: iconSize,
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(Icons.settings, color: Color.fromARGB(255, 247, 243, 243)),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/profile');
+                                },
+                              ),
+                            ),
+                            SizedBox(width: screenWidth * 0.03),
+                            Container(
+                              width: screenWidth * 0.11,
+                              height: screenWidth * 0.11,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                iconSize: iconSize,
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(Icons.logout, color: Color.fromARGB(255, 247, 243, 243)),
+                                onPressed: () async {
+                                  await FirebaseAuth.instance.signOut();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => const AuthScreen()),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              // Search Bar - Now full width with padding
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Colors.grey.shade500,
-                      ),
-                      hintText: "Search features",
-                      hintStyle: TextStyle(color: Colors.grey.shade500),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        searchText = value;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Main content area - Now takes remaining space
+              SizedBox(height: 48),
+              // Main content area - Now takes remaining space with better distribution
               Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Feature Cards - Now full width with padding
-                      for (var feature in filteredFeatures)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _buildFeatureCard(
-                            title: feature['title'],
-                            subtitle: feature['subtitle'],
-                            imageUrl: feature['imageUrl'],
-                            onTap: () {
-                              if (feature['route'] != null) {
-                                Navigator.pushNamed(context, feature['route']);
-                              }
-                            },
-                            hideButton: feature['hideButton'] ?? false,
-                            buttonText: feature['buttonText'] ?? "Explore",
-                            imageHeight: feature['imageHeight'],
-                            imageWidth: feature['imageWidth'],
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: IntrinsicHeight(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Feature Cards with responsive spacing
+                              for (int i = 0; i < filteredFeatures.length; i++)
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: i == filteredFeatures.length - 1 
+                                        ? cardSpacing * 0.93
+                                        : cardSpacing,
+                                  ),
+                                  child: _buildFeatureCard(
+                                    title: filteredFeatures[i]['title'],
+                                    subtitle: filteredFeatures[i]['subtitle'],
+                                    imageUrl: filteredFeatures[i]['imageUrl'],
+                                    onTap: () {
+                                      if (filteredFeatures[i]['route'] != null) {
+                                        Navigator.pushNamed(context, filteredFeatures[i]['route']);
+                                      }
+                                    },
+                                    hideButton: filteredFeatures[i]['hideButton'] ?? false,
+                                    buttonText: filteredFeatures[i]['buttonText'] ?? "Explore",
+                                    imageHeight: filteredFeatures[i]['imageHeight'],
+                                    imageWidth: filteredFeatures[i]['imageWidth'],
+                                    buttonHeight: buttonHeight,
+                                    screenWidth: screenWidth,
+                                  ),
+                                ),
+                              // User Stats Card with responsive spacing
+                              _buildStatsCard(
+                                minutesLogged: minutesLogged,
+                                countUsed: countUsed,
+                                totalSessions: totalSessions,
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                              ),
+                              // Flexible spacer to push content up while maintaining spacing
+                              SizedBox(height: cardSpacing),
+                            ],
                           ),
                         ),
-                      // User Stats Card - Now full width with padding
-                      _buildStatsCard(
-                        minutesLogged: minutesLogged,
-                        countUsed: countUsed,
-                        totalSessions: totalSessions,
                       ),
-                      const SizedBox(height: 16), // Bottom padding
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -329,8 +311,10 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onTap,
     bool hideButton = false,
     String buttonText = "Explore",
-    double? imageHeight,
-    double? imageWidth,
+    required double imageHeight,
+    required double imageWidth,
+    required double buttonHeight,
+    required double screenWidth,
   }) {
     return Container(
       width: double.infinity,
@@ -347,7 +331,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: Row(
           children: [
             Expanded(
@@ -357,26 +341,26 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.052,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF444444),
+                      color: const Color(0xFF444444),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: screenWidth * 0.02),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: screenWidth * 0.041,
                       color: Colors.grey.shade600,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (!hideButton) ...[
-                    const SizedBox(height: 12),
+                    SizedBox(height: screenWidth * 0.03),
                     Container(
-                      height: 36,
+                      height: buttonHeight,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
@@ -398,8 +382,8 @@ class _HomePageState extends State<HomePage> {
                           child: Center(
                             child: Text(
                               buttonText,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                               ),
@@ -412,10 +396,10 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: screenWidth * 0.03),
             Container(
-              width: imageWidth ?? 60,
-              height: imageHeight ?? 60,
+              width: imageWidth,
+              height: imageHeight,
               decoration: BoxDecoration(
                 color: Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(12),
@@ -430,7 +414,7 @@ class _HomePageState extends State<HomePage> {
                     return Icon(
                       Icons.image_not_supported_outlined,
                       color: Colors.grey.shade400,
-                      size: 30,
+                      size: imageWidth * 0.4,
                     );
                   },
                 ),
@@ -446,52 +430,54 @@ class _HomePageState extends State<HomePage> {
     required int minutesLogged,
     required int countUsed,
     required int totalSessions,
+    required double screenWidth,
+    required double screenHeight,
   }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [
-            const Color.fromARGB(255, 255, 255, 255),
-            const Color.fromARGB(255, 255, 255, 255),
+            Color.fromARGB(255, 255, 255, 255),
+            Color.fromARGB(255, 255, 255, 255),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF9D78F9).withOpacity(0.2)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(screenWidth * 0.05),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(screenWidth * 0.02),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.analytics_outlined,
                     color: Colors.white,
-                    size: 20,
+                    size: screenWidth * 0.07,
                   ),
                 ),
-                const SizedBox(width: 12),
-                const Text(
+                SizedBox(width: screenWidth * 0.03),
+                Text(
                   "User Stats",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: screenWidth * 0.052,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF444444),
+                    color: const Color(0xFF444444),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: screenHeight * 0.025),
             Row(
               children: [
                 Expanded(
@@ -499,11 +485,12 @@ class _HomePageState extends State<HomePage> {
                     "Minutes",
                     minutesLogged.toString(),
                     Icons.timer_outlined,
+                    screenWidth,
                   ),
                 ),
                 Container(
                   width: 1,
-                  height: 40,
+                  height: screenHeight * 0.095,
                   color: Colors.grey.shade300,
                 ),
                 Expanded(
@@ -511,11 +498,12 @@ class _HomePageState extends State<HomePage> {
                     "Counts",
                     countUsed.toString(),
                     Icons.confirmation_number_outlined,
+                    screenWidth,
                   ),
                 ),
                 Container(
                   width: 1,
-                  height: 40,
+                  height: screenHeight * 0.095,
                   color: Colors.grey.shade300,
                 ),
                 Expanded(
@@ -523,6 +511,7 @@ class _HomePageState extends State<HomePage> {
                     "Sessions",
                     totalSessions.toString(),
                     Icons.insights_outlined,
+                    screenWidth,
                   ),
                 ),
               ],
@@ -533,28 +522,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon) {
+  Widget _buildStatItem(String label, String value, IconData icon, double screenWidth) {
     return Column(
       children: [
         Icon(
           icon,
           color: const Color(0xFF9D78F9),
-          size: 24,
+          size: screenWidth * 0.075,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: screenWidth * 0.025),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 20,
+          style: TextStyle(
+            fontSize: screenWidth * 0.06,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF444444),
+            color: const Color(0xFF444444),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: screenWidth * 0.01),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: screenWidth * 0.034,
             color: Colors.grey.shade600,
             fontWeight: FontWeight.w500,
           ),
