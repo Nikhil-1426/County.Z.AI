@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:pipe_counting_app/support.dart';
 
 // Import all actual screens
 import 'loading_screen.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/history': (context) => const HistoryPage(), // <-- correct one
         '/info': (context) => const InfoPage(),
         '/profile': (context) => const ProfilePage(),
+        '/support': (context) => const SupportPage(), // Add support page route
       },
     );
   }

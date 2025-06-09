@@ -114,7 +114,7 @@ class _HomePageState extends State<HomePage> {
       },
       {
         'title': 'Recent Activity',
-        'subtitle': '', // Set later
+        'subtitle': 'Track your Journey', // Set later
         'imageUrl':
             'https://cdn2.iconfinder.com/data/icons/thin-outline-essential-ui/25/39-512.png',
         'route': '/history',
@@ -128,13 +128,6 @@ class _HomePageState extends State<HomePage> {
     final countUsed = userData['counts_used'] ?? 0;
     final minutesLogged = userData['minutes_logged'] ?? 0;
     final totalSessions = userData['total_sessions'] ?? 0;
-
-    final lastCountTimestamp = userData['last_count_time'];
-    final lastCount = lastCountTimestamp != null
-        ? (lastCountTimestamp as Timestamp).toDate().toString()
-        : "N/A";
-
-    allFeatures[1]['subtitle'] = "Last count: $lastCount";
 
     final filteredFeatures = allFeatures.where((feature) {
       return feature['title'].toLowerCase().contains(searchText.toLowerCase());
@@ -465,7 +458,7 @@ class _HomePageState extends State<HomePage> {
                   child: Icon(
                     Icons.analytics_outlined,
                     color: Colors.white,
-                    size: screenWidth * 0.05,
+                    size: screenWidth * 0.07,
                   ),
                 ),
                 SizedBox(width: screenWidth * 0.03),
@@ -530,7 +523,7 @@ class _HomePageState extends State<HomePage> {
         Icon(
           icon,
           color: const Color(0xFF9D78F9),
-          size: screenWidth * 0.07,
+          size: screenWidth * 0.075,
         ),
         SizedBox(height: screenWidth * 0.025),
         Text(
@@ -545,7 +538,7 @@ class _HomePageState extends State<HomePage> {
         Text(
           label,
           style: TextStyle(
-            fontSize: screenWidth * 0.03,
+            fontSize: screenWidth * 0.034,
             color: Colors.grey.shade600,
             fontWeight: FontWeight.w500,
           ),

@@ -23,6 +23,11 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360;
+    final isMediumScreen = screenWidth >= 360 && screenWidth < 400;
+    
     if (_uid == null) {
       return Scaffold(
         body: Container(
@@ -43,82 +48,89 @@ class _HistoryPageState extends State<HistoryPage> {
               children: [
                 // Header
                 Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 16.0 : 24.0,
+                    vertical: 16.0,
+                  ),
                   child: Row(
                     children: [
-                      const SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                          width: 40,
-                          height: 40,
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          width: isSmallScreen ? 36 : 40,
+                          height: isSmallScreen ? 36 : 40,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back,
                             color: Colors.white,
-                            size: 20,
+                            size: isSmallScreen ? 18 : 20,
                           ),
                         ),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           "History",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: isSmallScreen ? 18 : isMediumScreen ? 20 : 22,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 44),
+                      SizedBox(width: isSmallScreen ? 36 : 44),
                     ],
                   ),
                 ),
                 // Not signed in message
                 Expanded(
                   child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
-                              width: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: isSmallScreen ? 80 : 100,
+                            height: isSmallScreen ? 80 : 100,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(isSmallScreen ? 20 : 25),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.lock_outline,
+                              color: Colors.white,
+                              size: isSmallScreen ? 35 : 45,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.lock_outline,
-                            color: Colors.white,
-                            size: 45,
+                          SizedBox(height: isSmallScreen ? 16 : 24),
+                          Text(
+                            'Authentication Required',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 18 : 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white.withOpacity(0.95),
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Authentication Required',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white.withOpacity(0.95),
+                          SizedBox(height: isSmallScreen ? 6 : 8),
+                          Text(
+                            'Please sign in to view your history',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Please sign in to view your history',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -148,37 +160,40 @@ class _HistoryPageState extends State<HistoryPage> {
             children: [
               // Header Section
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 16.0 : 24.0,
+                  vertical: 16.0,
+                ),
                 child: Row(
                   children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 20,
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: isSmallScreen ? 36 : 40,
+                        height: isSmallScreen ? 36 : 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: isSmallScreen ? 18 : 20,
+                        ),
                       ),
                     ),
-                  ),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         "Detection History",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: isSmallScreen ? 21 : isMediumScreen ? 23 : 25,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 44),
+                    SizedBox(width: isSmallScreen ? 36 : 44),
                   ],
                 ),
               ),
@@ -197,18 +212,22 @@ class _HistoryPageState extends State<HistoryPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white.withOpacity(0.8),
+                            SizedBox(
+                              width: isSmallScreen ? 28 : 32,
+                              height: isSmallScreen ? 28 : 32,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white.withOpacity(0.8),
+                                ),
+                                strokeWidth: 3,
                               ),
-                              strokeWidth: 3,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: isSmallScreen ? 12 : 16),
                             Text(
                               'Loading history...',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.8),
-                                fontSize: 16,
+                                fontSize: isSmallScreen ? 14 : 16,
                               ),
                             ),
                           ],
@@ -218,45 +237,49 @@ class _HistoryPageState extends State<HistoryPage> {
                     
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(25),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                  width: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: isSmallScreen ? 80 : 100,
+                                height: isSmallScreen ? 80 : 100,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(isSmallScreen ? 20 : 25),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.history_outlined,
+                                  color: Colors.white,
+                                  size: isSmallScreen ? 35 : 45,
                                 ),
                               ),
-                              child: const Icon(
-                                Icons.history_outlined,
-                                color: Colors.white,
-                                size: 45,
+                              SizedBox(height: isSmallScreen ? 16 : 24),
+                              Text(
+                                'No History Found',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 18 : 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white.withOpacity(0.95),
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              'No History Found',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white.withOpacity(0.95),
+                              SizedBox(height: isSmallScreen ? 6 : 8),
+                              Text(
+                                'Start detecting pipes to see your history here',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 14 : 16,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Start detecting objects to see your history here',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white.withOpacity(0.8),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     }
@@ -265,7 +288,10 @@ class _HistoryPageState extends State<HistoryPage> {
 
                     return ListView.builder(
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 16 : 24, 
+                        vertical: 8
+                      ),
                       itemCount: docs.length,
                       itemBuilder: (context, index) {
                         final doc = docs[index];
@@ -277,28 +303,28 @@ class _HistoryPageState extends State<HistoryPage> {
                         final DateTime dateTime = timestamp.toDate();
 
                         return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
+                          margin: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(isSmallScreen ? 16 : 20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: isSmallScreen ? 10 : 15,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(20),
+                            padding: EdgeInsets.all(isSmallScreen ? 11 : 14),
                             child: Row(
                               children: [
                                 // Image Section
                                 Container(
-                                  width: 80,
-                                  height: 80,
+                                  width: isSmallScreen ? 65 : isMediumScreen ? 80 : 90,
+                                  height: isSmallScreen ? 65 : isMediumScreen ? 80 : 90,
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                                     gradient: imageUrl.isEmpty 
                                         ? const LinearGradient(
                                             colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
@@ -310,12 +336,10 @@ class _HistoryPageState extends State<HistoryPage> {
                                     ),
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(14),
+                                    borderRadius: BorderRadius.circular(isSmallScreen ? 10 : 14),
                                     child: imageUrl.isNotEmpty
                                         ? Image.network(
                                             imageUrl,
-                                            width: 80,
-                                            height: 80,
                                             fit: BoxFit.cover,
                                             errorBuilder: (_, __, ___) => Container(
                                               decoration: const BoxDecoration(
@@ -323,22 +347,22 @@ class _HistoryPageState extends State<HistoryPage> {
                                                   colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
                                                 ),
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.broken_image_outlined,
                                                 color: Colors.white,
-                                                size: 32,
+                                                size: isSmallScreen ? 24 : 32,
                                               ),
                                             ),
                                           )
-                                        : const Icon(
+                                        : Icon(
                                             Icons.image_not_supported_outlined,
                                             color: Colors.white,
-                                            size: 32,
+                                            size: isSmallScreen ? 24 : 32,
                                           ),
                                   ),
                                 ),
                                 
-                                const SizedBox(width: 16),
+                                SizedBox(width: isSmallScreen ? 12 : 16),
                                 
                                 // Content Section
                                 Expanded(
@@ -349,82 +373,75 @@ class _HistoryPageState extends State<HistoryPage> {
                                       Row(
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: isSmallScreen ? 8 : 12, 
+                                              vertical: isSmallScreen ? 4 : 6
+                                            ),
                                             decoration: BoxDecoration(
                                               gradient: const LinearGradient(
                                                 colors: [Color(0xFF9D78F9), Color(0xFF78BDF9)],
                                               ),
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius: BorderRadius.circular(isSmallScreen ? 10 : 12),
                                             ),
                                             child: Text(
                                               '$pipeCount',
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                                fontSize: isSmallScreen ? 14 : 16,
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            pipeCount == 1 ? 'Object' : 'Objects',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color(0xFF2D3748),
+                                          SizedBox(width: isSmallScreen ? 6 : 8),
+                                          Flexible(
+                                            child: Text(
+                                              pipeCount == 1 ? 'Pipe' : 'Pipes',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 16 : 18,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF2D3748),
+                                              ),
                                             ),
                                           ),
                                         ],
                                       ),
                                       
-                                      const SizedBox(height: 8),
+                                      SizedBox(height: isSmallScreen ? 6 : 8),
                                       
                                       // Date Section
                                       Row(
                                         children: [
                                           Icon(
                                             Icons.access_time_outlined,
-                                            size: 16,
+                                            size: isSmallScreen ? 14 : 16,
                                             color: Colors.grey.shade600,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            _formatDateTime(dateTime),
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey.shade600,
+                                          SizedBox(width: isSmallScreen ? 4 : 6),
+                                          Flexible(
+                                            child: Text(
+                                              _formatDateTime(dateTime),
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 12 : 14,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],
                                       ),
                                       
-                                      const SizedBox(height: 4),
+                                      SizedBox(height: isSmallScreen ? 2 : 4),
                                       
                                       // Time ago
                                       Text(
                                         _timeAgo(dateTime),
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: isSmallScreen ? 11 : 12,
                                           color: Colors.grey.shade500,
                                           fontStyle: FontStyle.italic,
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ),
-                                
-                                // Arrow Icon
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF9D78F9).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Color(0xFF9D78F9),
-                                    size: 16,
                                   ),
                                 ),
                               ],
