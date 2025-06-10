@@ -63,7 +63,6 @@ flutter run
 <pre>
 <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/signup.jpg" width = "250">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Homepage.jpg" width = "250">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/count_page1.jpg" width = "250">  
 <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/count_page2.jpg" width = "250">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/historypage.jpg" width = "250">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/profilepage.jpg" width = "250">  
-<img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/about%20page.jpg" width = "250">
 </pre>
 
 
