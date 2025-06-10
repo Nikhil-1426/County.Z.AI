@@ -1,4 +1,7 @@
-# Pipe Counting App
+<center>
+<img src="https://readme-typing-svg.herokuapp.com/?font=Times+New+Roman&weight=500&size=30&pause=1000&width=435&lines=Welcome+to+County.Z+AI!" />
+</center>
+
 
 This is a **Flutter** application that detects and counts pipes in an image using a **Flask** backend with a **YOLOv8** model. The app allows users to upload an image, processes it on the backend, and returns the image with detected pipes along with the pipe count.
 
@@ -58,7 +61,7 @@ flutter run
 
 # Screenshots
 <pre>
-<img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Homepage.jpg" width = "200">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Output1.jpg" width = "200">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Output2.jpg" width = "200">  <img src= "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Output3.jpg" width = "200">
+<img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/signup.jpg" width = "200">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/Homepage.jpg" width = "200">  <img src = "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/count_page1.jpg" width = "200">  <img src= "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/count_page2.jpg" width = "200"> <img src= "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/historypage.jpg" width = "200"> <img src= "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/profilepage.jpg" width = "200"> <img src= "https://github.com/Nikhil-1426/Pipe_Counting_App/blob/main/assets/about page.jpg" width = "200">
 </pre>
 
 ### TechStack
@@ -71,4 +74,4 @@ flutter run
    - Used for deploying the Flask backend, providing a scalable and reliable cloud platform to host the API, ensuring seamless access and performance for users worldwide.
 
 
-## Happy coding 💯
+## Developed by Ziga Infotech
