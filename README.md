@@ -78,7 +78,7 @@ flutter run
    - Used for deploying the Flask backend, providing a scalable and reliable cloud platform to host the API, ensuring seamless access and performance for users worldwide.
 4. **Firebase Authentication:**
    - Provides secure user sign-up and login functionality to enable personalized access and manage individual detection histories.
-5. **Firebase Firestore/Storage:**
+5. **Firebase Firestore and Firebase Storage:**
    - Stores detection results such as pipe counts and timestamps, allowing users to access and review their previous image processing history within the app.
 
 
