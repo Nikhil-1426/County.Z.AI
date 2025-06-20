@@ -3,17 +3,19 @@
 </center>
 
 
-This is a **Flutter** application that detects and counts pipes in an image using a **Flask** backend with a **YOLOv8** model. The app allows users to upload an image, processes it on the backend, and returns the image with detected pipes along with the pipe count.
+This is a **Flutter** application that detects and counts pipes in an image using a **Flask** backend with a **YOLOv8** model. The app allows users to upload an image, processes it on the backend, and returns the image with detected pipes along with the pipe count. It also uses **Firebase** to store and display the user's detection history.
 
 ---
 
 ## 📌 Features
 
+- Authenticate users securely using **FireAuth**.
 - Upload an image from the gallery or camera.
 - Sends the image to a **Flask** backend for pipe detection.
 - Receives a processed image with pipes mapped.
 - Displays the **number of detected pipes**.
 - Fast processing with **YOLOv8**.
+- Store and view past detection results using **Firebase**.
 
 ---
 
@@ -74,6 +76,11 @@ flutter run
    - Handles backend processes for trip analysis, health profiling, and REST API calls, ensuring seamless communication between the app and AI services.
 3. **Render:**
    - Used for deploying the Flask backend, providing a scalable and reliable cloud platform to host the API, ensuring seamless access and performance for users worldwide.
+4. **Firebase Authentication:**
+   - Provides secure user sign-up and login functionality to enable personalized access and manage individual detection histories.
+5. **Firebase Firestore/Storage:**
+   - Stores detection results such as pipe counts and timestamps, allowing users to access and review their previous image processing history within the app.
+
 
 ## About the Company
 
